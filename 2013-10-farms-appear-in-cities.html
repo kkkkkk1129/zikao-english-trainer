@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>阅读判断 · 2013年10月 · Farms Appear in Cities</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap');
+:root{--bg:#FAFAF7;--card:#FFF;--text:#1a1a1a;--text2:#5a5a5a;--text3:#888;--border:#e8e5df;--accent:#2B6CB0;--accent-light:#EBF4FF;--green:#276749;--green-bg:#F0FFF4;--green-bd:#C6F6D5;--red:#9B2C2C;--red-bg:#FFF5F5;--red-bd:#FED7D7;--orange:#975A16;--orange-bg:#FFFFF0;--orange-bd:#FEFCBF;--shadow:0 4px 12px rgba(0,0,0,0.08);--r:10px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Noto Sans SC',sans-serif;background:var(--bg);color:var(--text);line-height:1.8;min-height:100vh}
+.header{background:linear-gradient(135deg,#1a365d,#2B6CB0);color:#fff;padding:24px 20px;text-align:center}
+.header h1{font-family:'Noto Serif SC',serif;font-size:20px;font-weight:700;letter-spacing:2px}
+.header .sub{font-size:13px;opacity:.8;margin-top:4px;font-weight:300}
+.progress{display:flex;align-items:center;justify-content:center;gap:6px;padding:14px 16px;background:var(--card);border-bottom:1px solid var(--border);flex-wrap:wrap}
+.dot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;border:2px solid var(--border);color:var(--text3);transition:.3s;flex-shrink:0;cursor:pointer}
+.dot:hover{border-color:var(--accent);background:var(--accent-light)}
+.dot.active{border-color:var(--accent);background:var(--accent);color:#fff}
+.dot.done-right{border-color:var(--green);background:var(--green-bg);color:var(--green)}
+.dot.done-wrong{border-color:var(--red);background:var(--red-bg);color:var(--red)}
+.container{max-width:680px;margin:0 auto;padding:0 0 100px}
+.qcard{background:var(--card);margin:12px;border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden;display:none}
+.qcard.active{display:block}
+.qtop{padding:18px 20px;border-bottom:1px solid var(--border)}
+.qlabel{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:var(--accent);background:var(--accent-light);padding:3px 10px;border-radius:16px;margin-bottom:10px}
+.qtext{font-size:15px;font-weight:500;line-height:1.7}
+.passage{border-bottom:1px solid var(--border)}
+.passage-head{padding:12px 20px;background:#F7F7F5;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;cursor:pointer;font-size:13px;font-weight:600;color:var(--text2)}
+.passage-body{padding:18px 20px;font-size:14px;line-height:2;color:#333;transition:max-height .4s,opacity .3s,padding .3s;overflow:hidden}
+.passage-body.collapsed{max-height:0;padding:0 20px;opacity:0}
+.passage-body p{margin-bottom:10px;text-align:justify;text-indent:2em}
+.sent{transition:.4s;padding:1px 2px;border-radius:3px}
+.sent.hl{background:#FEF9C3;box-shadow:0 0 0 2px #ECC94B}
+.sent.dim{opacity:.25}
+.steps-hd{padding:14px 20px;font-size:13px;font-weight:600;color:var(--text2);border-bottom:1px solid var(--border);background:#F7F7F5}
+.step{border-bottom:1px solid var(--border);overflow:hidden}
+.step:last-child{border-bottom:none}
+.step-hd{padding:14px 20px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:.2s}
+.step-hd:hover{background:#FAFAF7}
+.step-hd.locked{cursor:default;opacity:.35}
+.step-hd.locked:hover{background:transparent}
+.snum{width:26px;height:26px;border-radius:50%;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--text3);flex-shrink:0;transition:.3s}
+.step.unlocked .snum{background:var(--accent);color:#fff}
+.step.revealed .snum{background:var(--green);color:#fff}
+.stitle{flex:1;font-size:13px;font-weight:500}
+.sarrow{color:var(--text3);transition:.3s;flex-shrink:0;font-size:12px}
+.step.revealed .sarrow{transform:rotate(90deg);color:var(--accent)}
+.scontent{max-height:0;overflow:hidden;transition:max-height .5s ease,padding .3s}
+.step.revealed .scontent{max-height:2000px;padding:0 20px 18px}
+.sinner{padding:14px;background:#F9FAFB;border-radius:8px;font-size:13px;line-height:1.9;color:var(--text2)}
+.hl-a{background:#93C5FD;padding:1px 4px;border-radius:3px;font-weight:600}
+.hl-b{background:#FCD34D;padding:1px 4px;border-radius:3px;font-weight:600}
+.hl-c{background:#86EFAC;padding:1px 4px;border-radius:3px;font-weight:600}
+.hl-x{background:#FCA5A5;padding:1px 4px;border-radius:3px;font-weight:600}
+.hl-g{background:#E5E7EB;padding:1px 4px;border-radius:3px;font-weight:600;color:#6B7280}
+.mlist{margin:10px 0;display:flex;flex-direction:column;gap:8px}
+.mitem{display:flex;flex-direction:column;gap:3px;padding:10px 12px;background:#fff;border-radius:6px;border:1px solid var(--border);font-size:13px;line-height:1.6}
+.mitem.conflict{border-color:var(--red-bd);background:var(--red-bg)}
+.mrow{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.msym-row{padding-left:40px;font-size:18px;font-weight:700}
+.msym-row.approx{color:#D69E2E}
+.msym-row.equal{color:var(--green)}
+.msym-row.conflict{color:var(--red)}
+.msym-row.empty{color:var(--red)}
+.mlabel{font-size:11px;font-weight:700;color:#fff;padding:2px 6px;border-radius:3px;flex-shrink:0;min-width:32px;text-align:center;background:#E53E3E}
+.mcn{font-size:12px;color:var(--text3)}
+.cbox{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+.cbox-item{padding:12px;border-radius:8px;font-size:13px;line-height:1.7}
+.cbox-q{background:#FFF5F5;border:1px solid #FED7D7}
+.cbox-p{background:var(--accent-light);border:1px solid #BEE3F8}
+.cbox-p.none{background:#F7FAFC;border-color:#CBD5E0}
+.cbox-label{font-size:11px;font-weight:700;letter-spacing:1px;margin-bottom:4px;color:var(--text3)}
+.jbox{margin-top:12px;padding:14px;border-radius:8px;font-size:13px;line-height:2}
+.jbox.true{background:var(--green-bg);border:1px solid var(--green-bd)}
+.jbox.false{background:var(--red-bg);border:1px solid var(--red-bd)}
+.jbox.ng{background:var(--orange-bg);border:1px solid var(--orange-bd)}
+.jicon{width:32px;height:32px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:16px;margin-right:8px;vertical-align:middle}
+.true .jicon{background:#C6F6D5}
+.false .jicon{background:#FED7D7}
+.ng .jicon{background:#FEFCBF}
+.mtag{display:inline-flex;padding:3px 8px;border-radius:16px;font-size:11px;font-weight:600;margin:4px 2px 0}
+.mtag.skill{background:#BEE3F8;color:#2B6CB0}
+.mtag.trap{background:#FED7D7;color:#9B2C2C}
+.mtag.method{background:#E9D8FD;color:#553C9A}
+.answer-sec{padding:18px 20px;border-top:1px solid var(--border);display:none}
+.answer-sec.show{display:block}
+.answer-prompt{font-size:13px;color:var(--text2);margin-bottom:10px;font-weight:500}
+.answer-opts{display:flex;gap:8px}
+.abtn{flex:1;padding:11px;border:2px solid var(--border);border-radius:8px;background:#fff;font-size:13px;font-weight:600;cursor:pointer;transition:.2s;text-align:center;font-family:inherit}
+.abtn:hover{border-color:var(--accent);background:var(--accent-light)}
+.abtn.correct{border-color:var(--green);background:var(--green-bg);color:var(--green)}
+.abtn.wrong{border-color:var(--red);background:var(--red-bg);color:var(--red)}
+.abtn:disabled{cursor:default;opacity:.5}
+.abtn.correct:disabled,.abtn.wrong:disabled{opacity:1}
+.ares{margin-top:12px;padding:10px 14px;border-radius:8px;font-size:13px;font-weight:500;display:none;line-height:1.6}
+.ares.show{display:block}
+.ares.ok{background:var(--green-bg);border:1px solid var(--green-bd);color:var(--green)}
+.ares.no{background:var(--red-bg);border:1px solid var(--red-bd);color:var(--red)}
+.reveal-wrap{display:none}
+.reveal-wrap.show{display:block}
+.next-sec{padding:18px 20px;text-align:center;display:none}
+.next-sec.show{display:block}
+.next-btn{background:linear-gradient(135deg,#2B6CB0,#3182CE);color:#fff;border:none;padding:12px 40px;border-radius:24px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;box-shadow:0 4px 14px rgba(43,108,176,.3);transition:.2s}
+.next-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(43,108,176,.4)}
+.score{background:var(--card);margin:12px;border-radius:var(--r);box-shadow:var(--shadow);padding:28px 20px;text-align:center;display:none}
+.score.show{display:block}
+.score-emoji{font-size:44px;margin-bottom:12px}
+.score-title{font-family:'Noto Serif SC',serif;font-size:18px;font-weight:700;margin-bottom:6px}
+.score-stats{display:flex;justify-content:center;gap:28px;margin:16px 0}
+.stat-n{font-size:26px;font-weight:700}
+.stat-n.g{color:var(--green)}.stat-n.r{color:var(--red)}
+.stat-l{font-size:11px;color:var(--text3);margin-top:2px}
+.weak-box{background:var(--orange-bg);border:1px solid var(--orange-bd);border-radius:8px;padding:14px;text-align:left;margin-top:14px}
+.weak-title{font-size:12px;font-weight:700;color:var(--orange);margin-bottom:4px}
+.weak-text{font-size:12px;color:#744210;line-height:1.7}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeIn .4s ease forwards}
+</style>
+</head>
+<body>
+<div class="header">
+<h1>阅读判断 · 解题思路训练</h1>
+<div class="sub">自考英语（专升本）（13000）· 2013年10月 · Farms Appear in Cities</div>
+</div>
+<a href="index.html" style="display:inline-block;margin:12px;padding:6px 14px;font-size:12px;color:var(--accent);background:var(--accent-light);border-radius:16px;text-decoration:none;font-weight:500">← 返回目录</a>
+<div class="progress" id="prog"></div>
+<div class="container" id="app"></div>
+
+<script>
+// ═══════════════════════════════════════
+//  EXAM DATA — 2013年10月
+// ═══════════════════════════════════════
+const EXAM = {
+id:"2013-10",
+title:"2013年10月",
+subtitle:"Farms Appear in Cities",
+passage:`<p><span class="sent" id="s1">When you hear the word "farm", you may imagine the countryside with cows and crops.</span> <span class="sent" id="s2">But scientists say the farms of the future could be built in tall buildings in some large cities.</span></p>
+<p><span class="sent" id="s3">It may be difficult to believe, but in fact, the technology for growing crops indoors already exists.</span> <span class="sent" id="s4">Farming in the city is already happening.</span> <span class="sent" id="s5">Some vegetables are already grown in green houses.</span> <span class="sent" id="s6">Even the scientists at the South Pole research station can enjoy fresh vegetables they grow in their own greenhouse.</span></p>
+<p><span class="sent" id="s7">Experts say indoor farming solves many problems.</span> <span class="sent" id="s8">First, traditional farming takes up a lot of land.</span> <span class="sent" id="s9">Growing crops in tall buildings--called vertical farming--can solve the problem.</span> <span class="sent" id="s10">Also, fruits and vegetables grown indoors would not face serious threats from insects and bad weather.</span></p>
+<p><span class="sent" id="s11">Though vertical farms don't exist yet, experts have created a plan for recycling in such farms.</span> <span class="sent" id="s12">The water from indoor fish ponds would be used to water crops.</span> <span class="sent" id="s13">Gases from crop waste would be used to heat the building.</span> <span class="sent" id="s14">Waste from chicken or pigs would be reused as a source of energy.</span></p>
+<p><span class="sent" id="s15">But experts believe vertical farming is not going to be easy.</span> <span class="sent" id="s16">They say it can be difficult to control climate conditions indoors.</span> <span class="sent" id="s17">Besides, plants differ in their weather and lighting needs.</span> <span class="sent" id="s18">For example, some plants like warm, sunny weather, but other plants prefer cooler temperatures.</span></p>
+<p><span class="sent" id="s19">That's not to say these difficulties won't be overcome--but it will take time.</span> <span class="sent" id="s20">Most experts suggest it may take almost 5 to 15 years before the first vertical farms could be created.</span></p>`,
+
+questions:[
+// ────── Q1 TRUE ──────
+{num:1, text:`The word "farm" may make you think of the countryside.`, answer:"TRUE", hl:["s1"],
+step1:`题目中的关键信息：<br><br>
+<div style="font-size:15px;line-height:1.9;color:var(--text)">The word "<span class="hl-a">farm</span>" may make you <span class="hl-b">think of</span> the <span class="hl-c">countryside</span>.</div><br>
+<strong>定位策略：用核心名词定位。</strong>题干中 <span class="hl-a">farm</span> 和 <span class="hl-c">countryside</span> 都是具体名词，直接在原文首段扫读。`,
+
+step2:`定位到第一段第1句：<br><br>
+<div style="font-size:14px;line-height:1.9;color:var(--text)">"When you hear the word '<span class="hl-a">farm</span>', you may <span class="hl-b">imagine</span> the <span class="hl-c">countryside</span> with cows and crops."</div>
+<div class="mlist">
+<div class="mitem"><div class="mrow"><span class="mlabel">题干</span> <span class="hl-b">think of</span> <span class="mcn">（想到）</span></div><div class="msym-row approx">≈</div><div class="mrow"><span class="mlabel">原文</span> <span class="hl-b">imagine</span> <span class="mcn">（想象，同义动词）</span></div></div>
+<div class="mitem"><div class="mrow"><span class="mlabel">题干</span> <span class="hl-a">farm</span></div><div class="msym-row equal">=</div><div class="mrow"><span class="mlabel">原文</span> <span class="hl-a">farm</span> <span class="mcn">（完全一致）</span></div></div>
+<div class="mitem"><div class="mrow"><span class="mlabel">题干</span> <span class="hl-c">countryside</span></div><div class="msym-row equal">=</div><div class="mrow"><span class="mlabel">原文</span> <span class="hl-c">countryside</span> <span class="mcn">（完全一致）</span></div></div>
+</div>
+<span class="hl-b">黄色</span>同义，<span class="hl-a">蓝色</span><span class="hl-c">绿色</span>完全一致，高度对应，定位成功。`,
+
+step3:`<div class="cbox">
+<div class="cbox-item cbox-q"><div class="cbox-label">题干含义</div><div style="font-size:12px;color:var(--accent);margin-bottom:3px">The word "<strong><span class="hl-a">farm</span></strong>" may make you <strong><span class="hl-b">think of</span></strong> the <strong><span class="hl-c">countryside</span></strong>.</div><span class="hl-a"><strong>farm</strong></span>这个词可能让你<span class="hl-b"><strong>想到</strong></span><span class="hl-c"><strong>乡村</strong></span>。</div>
+<div class="cbox-item cbox-p"><div class="cbox-label">原文含义</div><div style="font-size:12px;color:var(--accent);margin-bottom:3px">When you hear the word "<strong><span class="hl-a">farm</span></strong>", you may <strong><span class="hl-b">imagine</span></strong> the <strong><span class="hl-c">countryside</span></strong>.</div>当你听到<span class="hl-a"><strong>farm</strong></span>这个词时，你可能会<span class="hl-b"><strong>联想到</strong></span><span class="hl-c"><strong>乡村</strong></span>。</div>
+</div>
+<div class="jbox true"><strong>关系判断：含义一致 ✅</strong><br><br>
+<strong>think of</strong> ≈ <strong>imagine</strong>（同义动词，都表示"联想到"）<br>
+<strong>farm</strong> = <strong>farm</strong>（完全一致）<br>
+<strong>countryside</strong> = <strong>countryside</strong>（完全一致）<br><br>
+对象、动作、地点全部对应——含义完全一致。<br>
+<span class="mtag method">核心方法：同义改写识别 → 同义定位 → 同义解题</span></div>`,
+
+step4:`<div class="jbox true"><span class="jicon">✓</span><strong>答案：TRUE</strong><br><br>
+题干说"farm让你想到countryside"，原文说"听到farm你可能会联想到countryside"。think of ≈ imagine，其余完全一致。<br>
+<span class="mtag skill">同义改写识别</span></div>`},
+
+// ────── Q2 FALSE ──────
+{num:2, text:"It is still a dream for people to grow crops indoors.", answer:"FALSE", hl:["s3","s4"],
+step1:`题目中的关键信息：<br><br>
+<div style="font-size:15px;line-height:1.9;color:var(--text)">It is <span class="hl-x">still a dream</span> for people to <span class="hl-a">grow crops indoors</span>.</div><br>
+<strong>定位策略：用核心概念词定位。</strong>搜索 <span class="hl-a">grow crops indoors</span> 或其近义表达。<br><br>
+⚠️ 注意 <span class="hl-x">still a dream</span>（仍是梦想）——暗示"尚未实现"，需要在原文验证是否属实。`,
+
+step2:`定位到第二段第1-2句：<br><br>
+<div style="font-size:14px;line-height:1.9;color:var(--text)">"in fact, the technology for <span class="hl-a">growing crops indoors</span> <span class="hl-b">already exists</span>. Farming in the city is <span class="hl-b">already happening</span>."</div>
+<div class="mlist">
+<div class="mitem"><div class="mrow"><span class="mlabel">题干</span> <span class="hl-a">grow crops indoors</span> <span class="mcn">（在室内种庄稼）</span></div><div class="msym-row equal">=</div><div class="mrow"><span class="mlabel">原文</span> <span class="hl-a">growing crops indoors</span> <span class="mcn">（完全一致）</span></div></div>
+<div class="mitem conflict"><div class="mrow"><span class="mlabel">题干</span> <span class="hl-x">still a dream</span> <span class="mcn">（仍是梦想，尚未实现）</span></div><div class="msym-row conflict">✗</div><div class="mrow"><span class="mlabel">原文</span> <span class="hl-b">already exists / already happening</span> <span class="mcn">（已经存在，已经在发生）</span></div></div>
+</div>
+<span class="hl-a">蓝色</span>对象一致，但<span class="hl-x">红色</span>出现关键矛盾——题干说"仍是梦想"，原文说"已经实现"。`,
+
+step3:`<div class="cbox">
+<div class="cbox-item cbox-q"><div class="cbox-label">题干含义</div><div style="font-size:12px;color:var(--accent);margin-bottom:3px">It is <strong><span class="hl-x">still a dream</span></strong> for people to <strong><span class="hl-a">grow crops indoors</span></strong>.</div>对人们来说，<span class="hl-a"><strong>在室内种庄稼</strong></span><span class="hl-x"><strong>仍然是一个梦想</strong></span>。</div>
+<div class="cbox-item cbox-p"><div class="cbox-label">原文含义</div><div style="font-size:12px;color:var(--accent);margin-bottom:3px">The technology for <strong><span class="hl-a">growing crops indoors</span></strong> <strong><span class="hl-b">already exists</span></strong>.</div><span class="hl-a"><strong>室内种植</strong></span>的技术<span class="hl-b"><strong>已经存在</strong></span>，城市农业已经在发生。</div>
+</div>
+<div class="jbox false"><strong>关系判断：含义矛盾 ❌</strong><br><br>
+<strong>grow crops indoors</strong> = <strong>growing crops indoors</strong>（对象一致 ✅）<br>
+<strong><span class="hl-x">still a dream</span></strong> ✗ <strong><span class="hl-b">already exists</span></strong>（<strong>关键矛盾！</strong>"梦想"意味着未实现，"已经存在"意味着已实现）<br><br>
+原文用了两个 <strong>already</strong>（already exists + already happening）作为反面证据，直接否定了"仍是梦想"。<br>
+<span class="mtag trap">核心陷阱：时态/状态偷换（未实现→已实现）</span></div>`,
+
+step4:`<div class="jbox false"><span class="jicon">✗</span><strong>答案：FALSE</strong><br><br>
+题干说室内种植"仍是梦想"，原文连用两个already强调"已经存在""已经在发生"。梦想 vs 现实——直接矛盾。<br>
+<span class="mtag skill">反面证据识别</span><span class="mtag trap">状态偷换</span></div>`},
+
+// ────── Q3 NOT GIVEN ──────
+{num:3, text:"Scientists at the South Pole research station live a hard life.", answer:"NOT GIVEN", hl:["s6"],
+step1:`题目中的关键信息：<br><br>
+<div style="font-size:15px;line-height:1.9;color:var(--text)"><span class="hl-a">Scientists at the South Pole research station</span> <span class="hl-g">live a hard life</span>.</div><br>
+<strong>定位策略：用专有名词定位。</strong><span class="hl-a">South Pole</span> 是专有名词，首字母大写，在原文中一眼就能找到。<br><br>
+⚠️ 注意 <span class="hl-g">live a hard life</span> 用灰色标注——需要验证原文是否讨论了他们的生活状况。`,
+
+step2:`搜索"South Pole"，定位到第二段第4句：<br><br>
+<div style="font-size:14px;line-height:1.9;color:var(--text)">"Even the <span class="hl-a">scientists at the South Pole research station</span> can <span class="hl-b">enjoy fresh vegetables</span> they grow in their own greenhouse."</div>
+<div class="mlist">
+<div class="mitem"><div class="mrow"><span class="mlabel">题干</span> <span class="hl-a">Scientists at the South Pole research station</span></div><div class="msym-row equal">=</div><div class="mrow"><span class="mlabel">原文</span> <span class="hl-a">scientists at the South Pole research station</span> <span class="mcn">（完全一致）</span></div></div>
+<div class="mitem conflict"><div class="mrow"><span class="mlabel">题干</span> <span class="hl-g">live a hard life</span> <span class="mcn">（生活艰苦）</span></div><div class="msym-row empty">∅</div><div class="mrow"><span class="mlabel">原文</span> <span class="mcn" style="color:var(--red)">原文只说他们"能享受自种蔬菜"，未涉及生活是否艰苦</span></div></div>
+</div>
+<span class="hl-a">蓝色</span>主语找到了，但<span class="hl-g">灰色</span>"live a hard life"在原文中无任何对应——原文谈的是蔬菜种植，不是生活质量。`,
+
+step3:`<div class="cbox">
+<div class="cbox-item cbox-q"><div class="cbox-label">题干含义</div><div style="font-size:12px;color:var(--accent);margin-bottom:3px"><strong><span class="hl-a">Scientists at the South Pole research station</span></strong> <strong><span class="hl-g">live a hard life</span></strong>.</div><span class="hl-a"><strong>南极科考站的科学家</strong></span><span class="hl-g"><strong>生活艰苦</strong></span>。</div>
+<div class="cbox-item cbox-p none"><div class="cbox-label">原文含义</div><div style="font-size:12px;color:var(--text3);margin-bottom:3px;font-style:italic">（原文无关于生活质量的表述）</div><span style="color:var(--text3)">原文只提到南极科学家"能享受自种的新鲜蔬菜"，说明室内种植技术已在应用，但对他们的生活是否艰苦未做任何评论。</span></div>
+</div>
+<div class="jbox ng"><strong>关系判断：无法比较 ⚠️</strong><br><br>
+<strong>South Pole research station</strong> = 原文找到了（主语一致 ✅）<br>
+<strong><span class="hl-g">live a hard life</span></strong> → 原文中搜索 hard / difficult / tough / struggle → <strong>均未出现</strong>（∅）<br><br>
+主语找到了，但题干的核心描述"生活艰苦"在原文中<strong>连同义词都不存在</strong>。<br><br>
+⚠️ <strong>易错提醒：</strong>不要因为"南极"就用常识推断生活一定艰苦。阅读判断只看原文证据，不看生活常识。<br>
+<span class="mtag method">核心方法：同义词扫读失败 → 大概率NOT GIVEN</span></div>`,
+
+step4:`<div class="jbox ng"><span class="jicon">?</span><strong>答案：NOT GIVEN</strong><br><br>
+原文提到南极科学家是为了说明"室内种植已在应用"，对他们生活是否艰苦只字未提。"南极=艰苦"是你的常识，不是原文的证据。<br>
+<span class="mtag skill">FALSE与NOT GIVEN区分</span><span class="mtag trap">常识推断陷阱</span></div>`},
+
+// ────── Q4 TRUE ──────
+{num:4, text:"Vertical farming does not need as much land as traditional farming.", answer:"TRUE", hl:["s8","s9"],
+step1:`题目中的关键信息：<br><br>
+<div style="font-size:15px;line-height:1.9;color:var(--text)"><span class="hl-a">Vertical farming</span> does <span class="hl-b">not need as much land</span> as <span class="hl-c">traditional farming</span>.</div><br>
+<strong>定位策略：用专有术语定位。</strong><span class="hl-a">Vertical farming</span> 和 <span class="hl-c">traditional farming</span> 都是特定术语，在原文中容易找到。`,
+
+step2:`定位到第三段第2-3句：<br><br>
+<div style="font-size:14px;line-height:1.9;color:var(--text)">"<span class="hl-c">Traditional farming</span> <span class="hl-b">takes up a lot of land</span>. Growing crops in tall buildings--called <span class="hl-a">vertical farming</span>--can <span class="hl-b">solve the problem</span>."</div>
+<div class="mlist">
+<div class="mitem"><div class="mrow"><span class="mlabel">题干</span> <span class="hl-a">vertical farming</span> <span class="mcn">（垂直农业）</span></div><div class="msym-row equal">=</div><div class="mrow"><span class="mlabel">原文</span> <span class="hl-a">vertical farming</span> <span class="mcn">（完全一致）</span></div></div>
+<div class="mitem"><div class="mrow"><span class="mlabel">题干</span> <span class="hl-b">not need as much land</span> <span class="mcn">（<span class="hl-a">垂直农业</span>不需要那么多地）</span></div><div class="msym-row approx">≈</div><div class="mrow"><span class="mlabel">原文</span> <span class="hl-c">Traditional farming</span> <span class="hl-b">takes up a lot of land</span>. <span class="hl-a">Vertical farming</span> can <span class="hl-b">solve the problem</span>. <span class="mcn">（<span class="hl-c">传统农业</span>占地多 → <span class="hl-a">垂直农业</span>能解决这个问题 → 即<span class="hl-a">垂直农业</span>占地少）</span></div></div>
+<div class="mitem"><div class="mrow"><span class="mlabel">题干</span> <span class="hl-c">traditional farming</span></div><div class="msym-row equal">=</div><div class="mrow"><span class="mlabel">原文</span> <span class="hl-c">traditional farming</span> <span class="mcn">（完全一致）</span></div></div>
+</div>
+<span class="hl-a">蓝色</span><span class="hl-c">绿色</span>完全一致，<span class="hl-b">黄色</span>需要跨句推理：原文先说<span class="hl-c">传统农业</span>占地多，再说<span class="hl-a">垂直农业</span>能解决这个问题——两句合在一起等于"<span class="hl-a">垂直农业</span>不需要那么多地"，逻辑成立。`,
+
+step3:`<div class="cbox">
+<div class="cbox-item cbox-q"><div class="cbox-label">题干含义</div><div style="font-size:12px;color:var(--accent);margin-bottom:3px"><strong><span class="hl-a">Vertical farming</span></strong> does <strong><span class="hl-b">not need as much land</span></strong> as <strong><span class="hl-c">traditional farming</span></strong>.</div><span class="hl-a"><strong>垂直农业</strong></span>相比<span class="hl-c"><strong>传统农业</strong></span><span class="hl-b"><strong>不需要那么多土地</strong></span>。</div>
+<div class="cbox-item cbox-p"><div class="cbox-label">原文含义</div><div style="font-size:12px;color:var(--accent);margin-bottom:3px"><strong><span class="hl-c">Traditional farming</span></strong> <strong><span class="hl-b">takes up a lot of land</span></strong>. <strong><span class="hl-a">Vertical farming</span></strong> can <strong><span class="hl-b">solve the problem</span></strong>.</div><span class="hl-c"><strong>传统农业</strong></span><span class="hl-b"><strong>占地很多</strong></span>，<span class="hl-a"><strong>垂直农业</strong></span>能<span class="hl-b"><strong>解决这个问题</strong></span>。</div>
+</div>
+<div class="jbox true"><strong>关系判断：含义一致 ✅</strong><br><br>
+<strong>not need as much land</strong> ≈ <strong>takes up a lot of land + can solve the problem</strong>（原文分两步说：<span class="hl-c">传统农业</span>占地多 → <span class="hl-a">垂直农业</span>能解决 → 等于<span class="hl-a">垂直农业</span>占地少）<br>
+<strong>vertical farming</strong> = <strong>vertical farming</strong>（完全一致）<br>
+<strong>traditional farming</strong> = <strong>traditional farming</strong>（完全一致）<br><br>
+对象一致，核心含义通过跨句推导后吻合——原文用两个主语分两句说的事（<span class="hl-c">传统</span>占地多 + <span class="hl-a">垂直</span>能解决），题干合成一句说（<span class="hl-a">垂直</span>不需要那么多地）。<br>
+<span class="mtag method">核心方法：逻辑推导型同义（A解决了B的问题 = A不存在B的问题）</span></div>`,
+
+step4:`<div class="jbox true"><span class="jicon">✓</span><strong>答案：TRUE</strong><br><br>
+原文说传统农业占地多，垂直农业能解决这个问题。"解决土地问题"就等于"不需要那么多地"——逻辑推导后含义一致。<br>
+<span class="mtag skill">逻辑推导型同义</span></div>`},
+
+// ────── Q5 NOT GIVEN ──────
+{num:5, text:"Fresh fruits and vegetables are very expensive in cities.", answer:"NOT GIVEN", hl:[],
+step1:`题目中的关键信息：<br><br>
+<div style="font-size:15px;line-height:1.9;color:var(--text)"><span class="hl-g">Fresh fruits and vegetables</span> are <span class="hl-g">very expensive</span> in <span class="hl-g">cities</span>.</div><br>
+<strong>定位策略：用核心概念词扫读。</strong>搜索 <span class="hl-g">expensive</span> 及其近义词（costly / price / money / afford / cheap）在全文扫读。全部标灰色——预判可能找不到。`,
+
+step2:`搜索 <span class="hl-g">expensive</span> / <span class="hl-g">price</span> / <span class="hl-g">cost</span> / <span class="hl-g">money</span> / <span class="hl-g">cheap</span> / <span class="hl-g">afford</span> — <strong>全文均未出现。</strong>
+<div class="mlist">
+<div class="mitem conflict"><div class="mrow"><span class="mlabel">题干</span> <span class="hl-g">very expensive</span> <span class="mcn">（非常昂贵）</span></div><div class="msym-row empty">∅</div><div class="mrow"><span class="mlabel">原文</span> <span class="mcn" style="color:var(--red)">全文未涉及价格话题</span></div></div>
+</div>
+题干的核心概念 <span class="hl-g">expensive</span> 在全文中<strong>无法找到任何对应</strong>（∅）。原文讨论的是室内种植技术、垂直农业优势和挑战，从未涉及价格。`,
+
+step3:`<div class="cbox">
+<div class="cbox-item cbox-q"><div class="cbox-label">题干含义</div><div style="font-size:12px;color:var(--accent);margin-bottom:3px"><strong><span class="hl-g">Fresh fruits and vegetables</span></strong> are <strong><span class="hl-g">very expensive</span></strong> in cities.</div>城市中的<span class="hl-g"><strong>新鲜水果蔬菜</strong></span><span class="hl-g"><strong>非常昂贵</strong></span>。</div>
+<div class="cbox-item cbox-p none"><div class="cbox-label">原文含义</div><div style="font-size:12px;color:var(--text3);margin-bottom:3px;font-style:italic">（原文无对应英文句）</div><span style="color:var(--text3)">原文虽多次提到fruits and vegetables，但从未讨论它们的价格。</span></div>
+</div>
+<div class="jbox ng"><strong>关系判断：无法比较 ⚠️</strong><br><br>
+<strong><span class="hl-g">expensive</span></strong> → 原文中搜索 price / cost / money / cheap → <strong>均未出现</strong>（∅）<br><br>
+题干谈的是"价格"，原文谈的是"种植技术"，话题根本不在同一个维度上。<br>
+<span class="mtag method">核心方法：同义词扫读失败 → 大概率NOT GIVEN</span></div>`,
+
+step4:`<div class="jbox ng"><span class="jicon">?</span><strong>答案：NOT GIVEN</strong><br><br>
+原文全篇没有一个词涉及"价格""费用"话题。fruits and vegetables出现了，但跟expensive毫无关联。找到部分关键词不等于找到完整对应。<br>
+<span class="mtag skill">概念词扫读</span></div>`},
+
+// ────── Q6 TRUE ──────
+{num:6, text:"Crops grown indoors would not be badly harmed by insects.", answer:"TRUE", hl:["s10"],
+step1:`题目中的关键信息：<br><br>
+<div style="font-size:15px;line-height:1.9;color:var(--text)"><span class="hl-a">Crops grown indoors</span> would <span class="hl-b">not be badly harmed</span> by <span class="hl-c">insects</span>.</div><br>
+<strong>定位策略：用核心名词定位。</strong>搜索 <span class="hl-a">indoors</span> + <span class="hl-c">insects</span> 两个词同时出现的位置。`,
+
+step2:`定位到第三段第4句：<br><br>
+<div style="font-size:14px;line-height:1.9;color:var(--text)">"<span class="hl-a">fruits and vegetables grown indoors</span> would <span class="hl-b">not face serious threats</span> from <span class="hl-c">insects</span> and bad weather."</div>
+<div class="mlist">
+<div class="mitem"><div class="mrow"><span class="mlabel">题干</span> <span class="hl-a">crops grown indoors</span> <span class="mcn">（室内种植的庄稼）</span></div><div class="msym-row approx">≈</div><div class="mrow"><span class="mlabel">原文</span> <span class="hl-a">fruits and vegetables grown indoors</span> <span class="mcn">（室内种植的水果蔬菜）</span></div></div>
+<div class="mitem"><div class="mrow"><span class="mlabel">题干</span> <span class="hl-b">not be badly harmed</span> <span class="mcn">（不会严重受害）</span></div><div class="msym-row approx">≈</div><div class="mrow"><span class="mlabel">原文</span> <span class="hl-b">not face serious threats</span> <span class="mcn">（不会面临严重威胁）</span></div></div>
+<div class="mitem"><div class="mrow"><span class="mlabel">题干</span> <span class="hl-c">insects</span></div><div class="msym-row equal">=</div><div class="mrow"><span class="mlabel">原文</span> <span class="hl-c">insects</span> <span class="mcn">（完全一致）</span></div></div>
+</div>
+三组全部对应：<span class="hl-a">蓝色</span>对象同义，<span class="hl-b">黄色</span>描述同义，<span class="hl-c">绿色</span>完全一致。`,
+
+step3:`<div class="cbox">
+<div class="cbox-item cbox-q"><div class="cbox-label">题干含义</div><div style="font-size:12px;color:var(--accent);margin-bottom:3px"><strong><span class="hl-a">Crops grown indoors</span></strong> would <strong><span class="hl-b">not be badly harmed</span></strong> by <strong><span class="hl-c">insects</span></strong>.</div><span class="hl-a"><strong>室内种植的庄稼</strong></span>不会被<span class="hl-c"><strong>害虫</strong></span><span class="hl-b"><strong>严重侵害</strong></span>。</div>
+<div class="cbox-item cbox-p"><div class="cbox-label">原文含义</div><div style="font-size:12px;color:var(--accent);margin-bottom:3px"><strong><span class="hl-a">Fruits and vegetables grown indoors</span></strong> would <strong><span class="hl-b">not face serious threats</span></strong> from <strong><span class="hl-c">insects</span></strong>.</div><span class="hl-a"><strong>室内种植的水果蔬菜</strong></span>不会面临来自<span class="hl-c"><strong>害虫</strong></span>的<span class="hl-b"><strong>严重威胁</strong></span>。</div>
+</div>
+<div class="jbox true"><strong>关系判断：含义一致 ✅</strong><br><br>
+<strong>crops</strong> ≈ <strong>fruits and vegetables</strong>（庄稼 ≈ 水果蔬菜，上下位同义）<br>
+<strong>not be badly harmed</strong> ≈ <strong>not face serious threats</strong>（不会严重受害 ≈ 不会面临严重威胁）<br>
+<strong>insects</strong> = <strong>insects</strong>（完全一致）<br><br>
+对象同义、描述同义、原因一致——含义完全一致。<br>
+<span class="mtag method">核心方法：同义改写识别 → 同义定位 → 同义解题</span></div>`,
+
+step4:`<div class="jbox true"><span class="jicon">✓</span><strong>答案：TRUE</strong><br><br>
+两组关键的同义改写：crops ≈ fruits and vegetables，not be badly harmed ≈ not face serious threats。用词不同但含义完全一致。<br>
+<span class="mtag skill">同义改写识别</span></div>`},
+
+// ────── Q7 FALSE ──────
+{num:7, text:"Scientists do not know how to reuse the animal waste in vertical farms.", answer:"FALSE", hl:["s11","s14"],
+step1:`题目中的关键信息：<br><br>
+<div style="font-size:15px;line-height:1.9;color:var(--text)"><span class="hl-c">Scientists</span> <span class="hl-x">do not know how to</span> <span class="hl-b">reuse</span> the <span class="hl-a">animal waste</span> in vertical farms.</div><br>
+<strong>定位策略：用核心名词组合定位。</strong>搜索 <span class="hl-a">waste</span> + <span class="hl-c">vertical farms</span> 的共同出现位置。<br><br>
+⚠️ 注意 <span class="hl-x">do not know how to</span>（不知道怎么做）——这是一个否定表述，需要验证原文是否支持。`,
+
+step2:`定位到第四段第1句和第4句：<br><br>
+<div style="font-size:14px;line-height:1.9;color:var(--text)">"Though vertical farms don't exist yet, <span class="hl-c">experts</span> have <span class="hl-b">created a plan</span> for recycling in such farms... <span class="hl-a">Waste from chicken or pigs</span> would be <span class="hl-b">reused as a source of energy</span>."</div>
+<div class="mlist">
+<div class="mitem"><div class="mrow"><span class="mlabel">题干</span> <span class="hl-c">Scientists</span> <span class="mcn">（科学家）</span></div><div class="msym-row approx">≈</div><div class="mrow"><span class="mlabel">原文</span> <span class="hl-c">experts</span> <span class="mcn">（专家，同义）</span></div></div>
+<div class="mitem"><div class="mrow"><span class="mlabel">题干</span> <span class="hl-a">animal waste</span> <span class="mcn">（动物废物）</span></div><div class="msym-row approx">≈</div><div class="mrow"><span class="mlabel">原文</span> <span class="hl-a">waste from chicken or pigs</span> <span class="mcn">（鸡猪废物，属于动物废物）</span></div></div>
+<div class="mitem conflict"><div class="mrow"><span class="mlabel">题干</span> <span class="hl-x">do not know how to reuse</span> <span class="mcn">（不知道怎么重新利用）</span></div><div class="msym-row conflict">✗</div><div class="mrow"><span class="mlabel">原文</span> <span class="hl-b">have created a plan / reused as energy</span> <span class="mcn">（已制定计划 / 将作为能源重新利用）</span></div></div>
+</div>
+<span class="hl-c">绿色</span>主语同义（Scientists≈experts），<span class="hl-a">蓝色</span>对象同义，但<span class="hl-x">红色</span>出现关键矛盾——题干说"不知道怎么做"，原文说"已经有了方案并说明了具体做法"。`,
+
+step3:`<div class="cbox">
+<div class="cbox-item cbox-q"><div class="cbox-label">题干含义</div><div style="font-size:12px;color:var(--accent);margin-bottom:3px"><strong><span class="hl-c">Scientists</span></strong> <strong><span class="hl-x">do not know how to</span></strong> <strong><span class="hl-b">reuse</span></strong> the <strong><span class="hl-a">animal waste</span></strong> in vertical farms.</div><span class="hl-c"><strong>科学家</strong></span><span class="hl-x"><strong>不知道如何</strong></span>在垂直农场中<span class="hl-b"><strong>重新利用</strong></span><span class="hl-a"><strong>动物废物</strong></span>。</div>
+<div class="cbox-item cbox-p"><div class="cbox-label">原文含义</div><div style="font-size:12px;color:var(--accent);margin-bottom:3px"><strong><span class="hl-c">Experts</span></strong> <strong><span class="hl-b">have created a plan</span></strong> for recycling... <strong><span class="hl-a">Waste from chicken or pigs</span></strong> would be <strong><span class="hl-b">reused as energy</span></strong>.</div><span class="hl-c"><strong>专家</strong></span><span class="hl-b"><strong>已经制定了回收计划</strong></span>……<span class="hl-a"><strong>鸡猪废物</strong></span>将被<span class="hl-b"><strong>作为能源重新利用</strong></span>。</div>
+</div>
+<div class="jbox false"><strong>关系判断：含义矛盾 ❌</strong><br><br>
+<strong>Scientists</strong> ≈ <strong>experts</strong>（主语同义 ✅）<br>
+<strong>animal waste</strong> ≈ <strong>waste from chicken or pigs</strong>（对象同义 ✅）<br>
+<strong><span class="hl-x">do not know how to</span></strong> ✗ <strong><span class="hl-b">have created a plan + reused as energy</span></strong>（<strong>关键矛盾！</strong>"不知道"vs"已有方案且说明了具体做法"）<br><br>
+主语和对象都对得上，但核心动作完全相反：题干说"不知道"，原文说"已有计划"。原文不仅说了"已制定计划"，还具体说明了废物怎么用（作为能源），这是<strong>充分的反面证据</strong>。<br>
+<span class="mtag trap">核心陷阱：否定偷换（已知→未知）</span></div>`,
+
+step4:`<div class="jbox false"><span class="jicon">✗</span><strong>答案：FALSE</strong><br><br>
+题干说"不知道怎么做"，原文说"已经有计划"且详细说明了"废物将作为能源"。不仅知道怎么做，还说了具体方案——直接矛盾。<br>
+<span class="mtag skill">反面证据识别</span><span class="mtag trap">否定偷换</span></div>`},
+
+// ────── Q8 TRUE ──────
+{num:8, text:"Some experts say vertical farming could be difficult.", answer:"TRUE", hl:["s15"],
+step1:`题目中的关键信息：<br><br>
+<div style="font-size:15px;line-height:1.9;color:var(--text)"><span class="hl-a">Some experts</span> <span class="hl-b">say</span> <span class="hl-c">vertical farming</span> <span class="hl-b">could be difficult</span>.</div><br>
+<strong>定位策略：用专有术语定位。</strong>搜索 <span class="hl-c">vertical farming</span> + <span class="hl-b">difficult</span> 或其近义词。`,
+
+step2:`定位到第五段第1句：<br><br>
+<div style="font-size:14px;line-height:1.9;color:var(--text)">"But <span class="hl-a">experts</span> <span class="hl-b">believe</span> <span class="hl-c">vertical farming</span> is <span class="hl-b">not going to be easy</span>."</div>
+<div class="mlist">
+<div class="mitem"><div class="mrow"><span class="mlabel">题干</span> <span class="hl-a">some experts</span> <span class="mcn">（一些专家）</span></div><div class="msym-row approx">≈</div><div class="mrow"><span class="mlabel">原文</span> <span class="hl-a">experts</span> <span class="mcn">（专家，范围相容）</span></div></div>
+<div class="mitem"><div class="mrow"><span class="mlabel">题干</span> <span class="hl-b">say ... could be difficult</span> <span class="mcn">（说……可能困难）</span></div><div class="msym-row approx">≈</div><div class="mrow"><span class="mlabel">原文</span> <span class="hl-b">believe ... not going to be easy</span> <span class="mcn">（认为……不会容易）</span></div></div>
+<div class="mitem"><div class="mrow"><span class="mlabel">题干</span> <span class="hl-c">vertical farming</span></div><div class="msym-row equal">=</div><div class="mrow"><span class="mlabel">原文</span> <span class="hl-c">vertical farming</span> <span class="mcn">（完全一致）</span></div></div>
+</div>
+三组全部对应：<span class="hl-a">蓝色</span>范围相容（some experts ⊂ experts），<span class="hl-b">黄色</span>双重同义，<span class="hl-c">绿色</span>完全一致。`,
+
+step3:`<div class="cbox">
+<div class="cbox-item cbox-q"><div class="cbox-label">题干含义</div><div style="font-size:12px;color:var(--accent);margin-bottom:3px"><strong><span class="hl-a">Some experts</span></strong> <strong><span class="hl-b">say</span></strong> <strong><span class="hl-c">vertical farming</span></strong> <strong><span class="hl-b">could be difficult</span></strong>.</div><span class="hl-a"><strong>一些专家</strong></span><span class="hl-b"><strong>说</strong></span><span class="hl-c"><strong>垂直农业</strong></span><span class="hl-b"><strong>可能很困难</strong></span>。</div>
+<div class="cbox-item cbox-p"><div class="cbox-label">原文含义</div><div style="font-size:12px;color:var(--accent);margin-bottom:3px"><strong><span class="hl-a">Experts</span></strong> <strong><span class="hl-b">believe</span></strong> <strong><span class="hl-c">vertical farming</span></strong> is <strong><span class="hl-b">not going to be easy</span></strong>.</div><span class="hl-a"><strong>专家们</strong></span><span class="hl-b"><strong>认为</strong></span><span class="hl-c"><strong>垂直农业</strong></span><span class="hl-b"><strong>不会轻松</strong></span>。</div>
+</div>
+<div class="jbox true"><strong>关系判断：含义一致 ✅</strong><br><br>
+<strong>some experts</strong> ≈ <strong>experts</strong>（experts包含some experts，范围相容）<br>
+<strong>say</strong> ≈ <strong>believe</strong>（同义动词，都表示"表达观点"）<br>
+<strong>could be difficult</strong> ≈ <strong>not going to be easy</strong>（可能困难 ≈ 不会容易，正话反说的同义）<br><br>
+三组全部对应，含义完全一致。<br>
+<span class="mtag method">核心方法：正话反说型同义（difficult ≈ not easy）</span></div>`,
+
+step4:`<div class="jbox true"><span class="jicon">✓</span><strong>答案：TRUE</strong><br><br>
+双重同义改写：say ≈ believe，could be difficult ≈ not going to be easy。"困难"和"不容易"是正话反说的经典同义。<br>
+<span class="mtag skill">正话反说型同义</span></div>`},
+
+// ────── Q9 FALSE ──────
+{num:9, text:"Indoor plants need the same weather and lighting.", answer:"FALSE", hl:["s17"],
+step1:`题目中的关键信息：<br><br>
+<div style="font-size:15px;line-height:1.9;color:var(--text)"><span class="hl-a">Indoor plants</span> need <span class="hl-x">the same</span> <span class="hl-b">weather and lighting</span>.</div><br>
+<strong>定位策略：用核心名词定位。</strong>搜索 <span class="hl-a">plants</span> + <span class="hl-b">weather and lighting</span> 组合出现的位置。<br><br>
+⚠️ 注意 <span class="hl-x">the same</span>（相同的）——这是一个绝对化表述，需要验证。`,
+
+step2:`定位到第五段第3句：<br><br>
+<div style="font-size:14px;line-height:1.9;color:var(--text)">"<span class="hl-a">plants</span> <span class="hl-x">differ</span> in their <span class="hl-b">weather and lighting</span> needs."</div>
+<div class="mlist">
+<div class="mitem"><div class="mrow"><span class="mlabel">题干</span> <span class="hl-a">indoor plants</span> <span class="mcn">（室内植物）</span></div><div class="msym-row approx">≈</div><div class="mrow"><span class="mlabel">原文</span> <span class="hl-a">plants</span> <span class="mcn">（植物，上下文明确指室内植物）</span></div></div>
+<div class="mitem conflict"><div class="mrow"><span class="mlabel">题干</span> <span class="hl-x">the same</span> <span class="mcn">（相同的）</span></div><div class="msym-row conflict">✗</div><div class="mrow"><span class="mlabel">原文</span> <span class="hl-x">differ</span> <span class="mcn">（不同的，直接反义）</span></div></div>
+<div class="mitem"><div class="mrow"><span class="mlabel">题干</span> <span class="hl-b">weather and lighting</span></div><div class="msym-row equal">=</div><div class="mrow"><span class="mlabel">原文</span> <span class="hl-b">weather and lighting</span> <span class="mcn">（完全一致）</span></div></div>
+</div>
+<span class="hl-a">蓝色</span>对象对应，<span class="hl-b">黄色</span>完全一致，但<span class="hl-x">红色</span>出现直接反义——the same ✗ differ。`,
+
+step3:`<div class="cbox">
+<div class="cbox-item cbox-q"><div class="cbox-label">题干含义</div><div style="font-size:12px;color:var(--accent);margin-bottom:3px"><strong><span class="hl-a">Indoor plants</span></strong> need <strong><span class="hl-x">the same</span></strong> <strong><span class="hl-b">weather and lighting</span></strong>.</div><span class="hl-a"><strong>室内植物</strong></span>需要<span class="hl-x"><strong>相同的</strong></span><span class="hl-b"><strong>天气和光照</strong></span>。</div>
+<div class="cbox-item cbox-p"><div class="cbox-label">原文含义</div><div style="font-size:12px;color:var(--accent);margin-bottom:3px"><strong><span class="hl-a">Plants</span></strong> <strong><span class="hl-x">differ</span></strong> in their <strong><span class="hl-b">weather and lighting</span></strong> needs.</div><span class="hl-a"><strong>植物</strong></span>在<span class="hl-b"><strong>天气和光照</strong></span>需求上<span class="hl-x"><strong>各不相同</strong></span>。</div>
+</div>
+<div class="jbox false"><strong>关系判断：含义矛盾 ❌</strong><br><br>
+<strong>indoor plants</strong> ≈ <strong>plants</strong>（对象一致 ✅）<br>
+<strong>weather and lighting</strong> = <strong>weather and lighting</strong>（完全一致 ✅）<br>
+<strong><span class="hl-x">the same</span></strong> ✗ <strong><span class="hl-x">differ</span></strong>（<strong>关键矛盾！</strong>"相同" vs "不同"，直接反义词）<br><br>
+same和differ是一对反义词，矛盾关系非常明确。原文还用例子佐证（有的喜欢暖和天气，有的喜欢凉爽温度），进一步证实了"不同"。<br>
+<span class="mtag trap">核心陷阱：反义偷换（same→differ）</span></div>`,
+
+step4:`<div class="jbox false"><span class="jicon">✗</span><strong>答案：FALSE</strong><br><br>
+最直接的反义矛盾：题干说the same，原文说differ。后面还举例说明"有的植物喜欢暖和天气，有的喜欢凉爽温度"——反面证据充分。<br>
+<span class="mtag skill">反义词识别</span><span class="mtag trap">反义偷换</span></div>`},
+
+// ────── Q10 FALSE ──────
+{num:10, text:"The first vertical farms appeared 5 years ago.", answer:"FALSE", hl:["s11","s20"],
+step1:`题目中的关键信息：<br><br>
+<div style="font-size:15px;line-height:1.9;color:var(--text)">The <span class="hl-a">first vertical farms</span> <span class="hl-x">appeared</span> <span class="hl-b">5 years ago</span>.</div><br>
+<strong>定位策略：优先用数字定位。</strong>搜索 <span class="hl-b">5</span> 或 <span class="hl-a">vertical farms</span> + 时间相关表述。<br><br>
+⚠️ 注意 <span class="hl-x">appeared</span>（出现了）——过去时，意味着已经存在，需要验证。`,
+
+step2:`定位到第四段第1句和第六段第2句：<br><br>
+<div style="font-size:14px;line-height:1.9;color:var(--text)">"Though <span class="hl-a">vertical farms</span> <span class="hl-x">don't exist yet</span>..."<br>"Most experts suggest it may take almost <span class="hl-b">5 to 15 years</span> before the <span class="hl-a">first vertical farms</span> could be <span class="hl-x">created</span>."</div>
+<div class="mlist">
+<div class="mitem"><div class="mrow"><span class="mlabel">题干</span> <span class="hl-a">first vertical farms</span> <span class="mcn">（第一批垂直农场）</span></div><div class="msym-row equal">=</div><div class="mrow"><span class="mlabel">原文</span> <span class="hl-a">first vertical farms</span> <span class="mcn">（完全一致）</span></div></div>
+<div class="mitem conflict"><div class="mrow"><span class="mlabel">题干</span> <span class="hl-x">appeared 5 years ago</span> <span class="mcn">（5年前出现了）</span></div><div class="msym-row conflict">✗</div><div class="mrow"><span class="mlabel">原文</span> <span class="hl-x">don't exist yet</span> + <span class="hl-b">may take 5-15 years to be created</span> <span class="mcn">（尚不存在 + 可能还要5-15年才能建成）</span></div></div>
+</div>
+<span class="hl-a">蓝色</span>对象一致，但<span class="hl-x">红色</span>出现双重矛盾——题干说"已经出现"，原文说"尚不存在"且"未来才可能建成"。`,
+
+step3:`<div class="cbox">
+<div class="cbox-item cbox-q"><div class="cbox-label">题干含义</div><div style="font-size:12px;color:var(--accent);margin-bottom:3px">The <strong><span class="hl-a">first vertical farms</span></strong> <strong><span class="hl-x">appeared</span></strong> <strong><span class="hl-b">5 years ago</span></strong>.</div><span class="hl-a"><strong>第一批垂直农场</strong></span>在<span class="hl-b"><strong>5年前</strong></span><span class="hl-x"><strong>出现了</strong></span>。</div>
+<div class="cbox-item cbox-p"><div class="cbox-label">原文含义</div><div style="font-size:12px;color:var(--accent);margin-bottom:3px"><strong><span class="hl-a">Vertical farms</span></strong> <strong><span class="hl-x">don't exist yet</span></strong>... may take <strong><span class="hl-b">5 to 15 years</span></strong> to be created.</div><span class="hl-a"><strong>垂直农场</strong></span><span class="hl-x"><strong>尚不存在</strong></span>，可能还需<span class="hl-b"><strong>5到15年</strong></span>才能建成。</div>
+</div>
+<div class="jbox false"><strong>关系判断：含义矛盾 ❌</strong><br><br>
+<strong>first vertical farms</strong> = <strong>first vertical farms</strong>（对象一致 ✅）<br>
+<strong><span class="hl-x">appeared</span></strong>（已经出现）✗ <strong><span class="hl-x">don't exist yet</span></strong>（尚不存在）— <strong>关键矛盾！</strong><br>
+<strong><span class="hl-b">5 years ago</span></strong>（过去）✗ <strong><span class="hl-b">may take 5-15 years</span></strong>（未来）— 时间方向也矛盾<br><br>
+题干说"过去已出现"，原文说"现在不存在+未来才可能"——双重矛盾。<br>
+<span class="mtag trap">核心陷阱：时态偷换（未来→过去）</span></div>`,
+
+step4:`<div class="jbox false"><span class="jicon">✗</span><strong>答案：FALSE</strong><br><br>
+原文明确说"vertical farms don't exist yet"（尚不存在），又说"可能还需5-15年才能建成"。题干说"5年前出现了"——时态完全颠倒，过去 vs 未来。<br>
+<span class="mtag skill">时态敏感</span><span class="mtag trap">时态偷换</span></div>`}
+]};
+
+// ═══════════════════════════════════════
+//  RENDERING ENGINE
+// ═══════════════════════════════════════
+const S = {cur:0, answers:{}, steps:{}, total:EXAM.questions.length};
+EXAM.questions.forEach((_,i)=>S.steps[i]=0);
+
+function init(){
+  // Progress dots
+  const prog=document.getElementById('prog');
+  for(let i=0;i<S.total;i++){
+    const d=document.createElement('div');
+    d.className='dot'+(i===0?' active':'');
+    d.id='dot'+i;
+    d.textContent=i+1;
+    d.onclick=()=>jumpTo(i);
+    prog.appendChild(d);
+  }
+  // Render all question cards
+  const app=document.getElementById('app');
+  EXAM.questions.forEach((q,i)=>{
+    const card=document.createElement('div');
+    card.className='qcard'+(i===0?' active fade-in':'');
+    card.id='qcard'+i;
+    card.innerHTML=buildCard(q,i);
+    app.appendChild(card);
+  });
+  // Score card
+  app.innerHTML+=`<div class="score" id="scoreCard">
+    <div class="score-emoji" id="scoreEmoji">🎯</div>
+    <div class="score-title" id="scoreTitle">训练完成！</div>
+    <div class="score-stats"><div><div class="stat-n g" id="sc-right">0</div><div class="stat-l">正确</div></div><div><div class="stat-n r" id="sc-wrong">0</div><div class="stat-l">错误</div></div><div><div class="stat-n" style="color:var(--accent)" id="sc-total">${S.total}</div><div class="stat-l">共计</div></div></div>
+    <div id="sc-detail" style="font-size:13px;color:var(--text2);line-height:1.8;margin:10px 0"></div>
+    <div class="weak-box" id="weakBox" style="display:none"><div class="weak-title">📌 需要重点加强</div><div class="weak-text" id="weakText"></div></div>
+  </div>`;
+}
+
+function buildCard(q,i){
+  const isLast=i===S.total-1;
+  return `
+  <div class="qtop"><div class="qlabel">📝 第 ${q.num} 题</div><div class="qtext">${q.text}</div></div>
+  <div class="passage" id="psg${i}">
+    <div class="passage-head" onclick="togglePsg(${i})">📄 阅读原文 <span id="psg-tog${i}">收起 ▾</span></div>
+    <div class="passage-body" id="psg-body${i}">${EXAM.passage}</div>
+  </div>
+  <div><div class="steps-hd">🔍 解题思路拆解</div>
+  ${buildStep(i,0,'找出题目关键词',q.step1)}
+  ${buildStep(i,1,'在原文中定位',q.step2)}
+  ${buildStep(i,2,'含义判断',q.step3)}
+  </div>
+  <div class="answer-sec" id="ans${i}">
+    <div class="answer-prompt">根据以上分析，你的判断是：</div>
+    <div class="answer-opts">
+      <button class="abtn" onclick="answer(${i},'TRUE')">TRUE</button>
+      <button class="abtn" onclick="answer(${i},'FALSE')">FALSE</button>
+      <button class="abtn" onclick="answer(${i},'NOT GIVEN')">NOT GIVEN</button>
+    </div>
+    <div class="ares" id="ares${i}"></div>
+  </div>
+  <div class="reveal-wrap" id="rev${i}">
+    <div><div class="steps-hd">💡 答案揭晓</div>
+    <div style="padding:16px 20px"><div class="sinner">${q.step4}</div></div></div>
+  </div>
+  <div class="next-sec" id="nxt${i}">
+    <button class="next-btn" onclick="${isLast?'showScore()':'go('+(i+1)+')'}">${isLast?'查看训练报告 →':'下一题 →'}</button>
+  </div>`;
+}
+
+function buildStep(qi,si,title,content){
+  const cls=si===0?'step unlocked':'step';
+  const lock=si===0?'':'locked';
+  return `<div class="${cls}" id="st${qi}-${si}" onclick="reveal(${qi},${si})">
+    <div class="step-hd ${lock}"><div class="snum">${si+1}</div><div class="stitle">${title}</div><div class="sarrow">▸</div></div>
+    <div class="scontent"><div class="sinner">${content}</div></div>
+  </div>`;
+}
+
+function togglePsg(i){
+  const body=document.getElementById('psg-body'+i);
+  const tog=document.getElementById('psg-tog'+i);
+  body.classList.toggle('collapsed');
+  tog.textContent=body.classList.contains('collapsed')?'展开 ▸':'收起 ▾';
+}
+
+function reveal(qi,si){
+  if(S.steps[qi]<si)return;
+  const el=document.getElementById('st'+qi+'-'+si);
+  if(el.classList.contains('revealed'))return;
+  el.classList.add('revealed','unlocked');
+  el.querySelector('.step-hd').classList.remove('locked');
+  S.steps[qi]=si+1;
+  // unlock next
+  if(si<2){
+    const nxt=document.getElementById('st'+qi+'-'+(si+1));
+    if(nxt){nxt.classList.add('unlocked');nxt.querySelector('.step-hd').classList.remove('locked');}
+  }
+  // highlight passage on step 2
+  if(si===1){
+    const q=EXAM.questions[qi];
+    document.querySelectorAll('#qcard'+qi+' .sent').forEach(s=>{
+      if(q.hl.includes(s.id))s.classList.add('hl');
+      else if(q.hl.length>0)s.classList.add('dim');
+    });
+  }
+  // show answer section after step 3
+  if(si===2){
+    const ans=document.getElementById('ans'+qi);
+    ans.classList.add('show');
+    ans.classList.add('fade-in');
+    setTimeout(()=>ans.scrollIntoView({behavior:'smooth',block:'center'}),200);
+  }
+}
+
+function answer(qi,val){
+  if(S.answers[qi])return;
+  S.answers[qi]=val;
+  const q=EXAM.questions[qi];
+  const ok=val===q.answer;
+  // style buttons
+  document.querySelectorAll('#ans'+qi+' .abtn').forEach(b=>{
+    b.disabled=true;
+    if(b.textContent===val)b.classList.add(ok?'correct':'wrong');
+    if(!ok&&b.textContent===q.answer)b.classList.add('correct');
+  });
+  // result text
+  const res=document.getElementById('ares'+qi);
+  res.classList.add('show',ok?'ok':'no');
+  res.textContent=ok?'✅ 正确！看看完整解析：':'❌ 你选了 '+val+'，正确答案是 '+q.answer+'。看看为什么：';
+  // show step 4 + next
+  setTimeout(()=>{
+    const rev=document.getElementById('rev'+qi);
+    rev.classList.add('show','fade-in');
+    document.getElementById('nxt'+qi).classList.add('show');
+    rev.scrollIntoView({behavior:'smooth',block:'center'});
+  },400);
+}
+
+function jumpTo(qi){
+  if(qi===S.cur && !document.getElementById('scoreCard').classList.contains('show'))return;
+  // hide score card if showing
+  document.getElementById('scoreCard').classList.remove('show');
+  // clear highlights on current card
+  const curCard=document.getElementById('qcard'+S.cur);
+  if(curCard)curCard.querySelectorAll('.sent').forEach(s=>s.className='sent');
+  // hide current card
+  if(curCard)curCard.classList.remove('active');
+  // update previous dot
+  const pd=document.getElementById('dot'+S.cur);
+  pd.classList.remove('active');
+  if(S.answers[S.cur]!==undefined){
+    pd.classList.add(S.answers[S.cur]===EXAM.questions[S.cur].answer?'done-right':'done-wrong');
+  }
+  // show target card
+  const card=document.getElementById('qcard'+qi);
+  card.classList.add('active','fade-in');
+  // update target dot
+  const nd=document.getElementById('dot'+qi);
+  nd.classList.remove('done-right','done-wrong');
+  nd.classList.add('active');
+  S.cur=qi;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function go(qi){
+  jumpTo(qi);
+}
+
+function showScore(){
+  document.getElementById('qcard'+S.cur).classList.remove('active');
+  const pd=document.getElementById('dot'+S.cur);
+  pd.classList.remove('active');
+  pd.classList.add(S.answers[S.cur]===EXAM.questions[S.cur].answer?'done-right':'done-wrong');
+
+  let right=0,wrong=0,wrongs=[];
+  EXAM.questions.forEach((q,i)=>{
+    if(S.answers[i]===q.answer)right++;
+    else{wrong++;wrongs.push(q);}
+  });
+  document.getElementById('sc-right').textContent=right;
+  document.getElementById('sc-wrong').textContent=wrong;
+  const sc=document.getElementById('scoreCard');
+  const emoji=document.getElementById('scoreEmoji');
+  const title=document.getElementById('scoreTitle');
+  const detail=document.getElementById('sc-detail');
+  if(right>=9){emoji.textContent='🎉';title.textContent='太棒了！';}
+  else if(right>=7){emoji.textContent='💪';title.textContent='表现不错！';}
+  else if(right>=5){emoji.textContent='📖';title.textContent='继续加油！';}
+  else{emoji.textContent='🔄';title.textContent='需要多练习';}
+  detail.textContent=`${S.total}题中答对${right}题。`;
+  if(wrongs.length>0){
+    document.getElementById('weakBox').style.display='block';
+    document.getElementById('weakText').textContent='错题：'+wrongs.map(q=>'第'+q.num+'题('+q.answer+')').join('、')+'。建议回顾这些题的解题思路，重点关注步骤3的含义判断。';
+  }
+  sc.classList.add('show','fade-in');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+init();
+</script>
+</body>
+</html>

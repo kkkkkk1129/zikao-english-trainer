@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>阅读判断 · 2014年4月 · Running: Sport or Way of Life?</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap');
+:root{--bg:#FAFAF7;--card:#FFF;--text:#1a1a1a;--text2:#5a5a5a;--text3:#888;--border:#e8e5df;--accent:#2B6CB0;--accent-light:#EBF4FF;--green:#276749;--green-bg:#F0FFF4;--green-bd:#C6F6D5;--red:#9B2C2C;--red-bg:#FFF5F5;--red-bd:#FED7D7;--orange:#975A16;--orange-bg:#FFFFF0;--orange-bd:#FEFCBF;--shadow:0 4px 12px rgba(0,0,0,0.08);--r:10px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Noto Sans SC',sans-serif;background:var(--bg);color:var(--text);line-height:1.8;min-height:100vh}
+.header{background:linear-gradient(135deg,#1a365d,#2B6CB0);color:#fff;padding:24px 20px;text-align:center}
+.header h1{font-family:'Noto Serif SC',serif;font-size:20px;font-weight:700;letter-spacing:2px}
+.header .sub{font-size:13px;opacity:.8;margin-top:4px;font-weight:300}
+.back-link{display:inline-block;margin:12px;padding:6px 14px;font-size:12px;color:var(--accent);background:var(--accent-light);border-radius:16px;text-decoration:none;font-weight:500}
+.back-link:hover{background:#D0E4F7}
+.progress{display:flex;align-items:center;justify-content:center;gap:6px;padding:14px 16px;background:var(--card);border-bottom:1px solid var(--border);flex-wrap:wrap}
+.dot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;border:2px solid var(--border);color:var(--text3);transition:.3s;flex-shrink:0;cursor:pointer}
+.dot:hover{border-color:var(--accent);background:var(--accent-light)}
+.dot.active{border-color:var(--accent);background:var(--accent);color:#fff}
+.dot.done-right{border-color:var(--green);background:var(--green-bg);color:var(--green)}
+.dot.done-wrong{border-color:var(--red);background:var(--red-bg);color:var(--red)}
+.container{max-width:680px;margin:0 auto;padding:0 0 100px}
+.qcard{background:var(--card);margin:12px;border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden;display:none}
+.qcard.active{display:block}
+.qtop{padding:18px 20px;border-bottom:1px solid var(--border)}
+.qlabel{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:var(--accent);background:var(--accent-light);padding:3px 10px;border-radius:16px;margin-bottom:10px}
+.qtext{font-size:15px;font-weight:500;line-height:1.7}
+.passage{border-bottom:1px solid var(--border)}
+.passage-head{padding:12px 20px;background:#F7F7F5;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;cursor:pointer;font-size:13px;font-weight:600;color:var(--text2)}
+.passage-body{padding:18px 20px;font-size:14px;line-height:2;color:#333;transition:max-height .4s,opacity .3s,padding .3s;overflow:hidden}
+.passage-body.collapsed{max-height:0;padding:0 20px;opacity:0}
+.passage-body p{margin-bottom:10px;text-align:justify;text-indent:2em}
+.sent{transition:.4s;padding:1px 2px;border-radius:3px}
+.sent.hl{background:#FEF9C3;box-shadow:0 0 0 2px #ECC94B}
+.sent.dim{opacity:.25}
+.steps-hd{padding:14px 20px;font-size:13px;font-weight:600;color:var(--text2);border-bottom:1px solid var(--border);background:#F7F7F5}
+.step{border-bottom:1px solid var(--border);overflow:hidden}
+.step:last-child{border-bottom:none}
+.step-hd{padding:14px 20px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:.2s}
+.step-hd:hover{background:#FAFAF7}
+.step-hd.locked{cursor:default;opacity:.35}
+.step-hd.locked:hover{background:transparent}
+.snum{width:26px;height:26px;border-radius:50%;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--text3);flex-shrink:0;transition:.3s}
+.step.unlocked .snum{background:var(--accent);color:#fff}
+.step.revealed .snum{background:var(--green);color:#fff}
+.stitle{flex:1;font-size:13px;font-weight:500}
+.sarrow{color:var(--text3);transition:.3s;flex-shrink:0;font-size:12px}
+.step.revealed .sarrow{transform:rotate(90deg);color:var(--accent)}
+.scontent{max-height:0;overflow:hidden;transition:max-height .5s ease,padding .3s}
+.step.revealed .scontent{max-height:2000px;padding:0 20px 18px}
+.sinner{padding:14px;background:#F9FAFB;border-radius:8px;font-size:13px;line-height:1.9;color:var(--text2)}
+.hl-a{background:#93C5FD;padding:1px 4px;border-radius:3px;font-weight:600}
+.hl-b{background:#FCD34D;padding:1px 4px;border-radius:3px;font-weight:600}
+.hl-c{background:#86EFAC;padding:1px 4px;border-radius:3px;font-weight:600}
+.hl-x{background:#FCA5A5;padding:1px 4px;border-radius:3px;font-weight:600}
+.hl-g{background:#E5E7EB;padding:1px 4px;border-radius:3px;font-weight:600;color:#6B7280}
+.mlist{margin:10px 0;display:flex;flex-direction:column;gap:8px}
+.mitem{display:flex;flex-direction:column;gap:3px;padding:10px 12px;background:#fff;border-radius:6px;border:1px solid var(--border);font-size:13px;line-height:1.6}
+.mitem.conflict{border-color:var(--red-bd);background:var(--red-bg)}
+.mrow{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.msym-row{padding-left:40px;font-size:18px;font-weight:700}
+.msym-row.approx{color:#D69E2E}.msym-row.equal{color:var(--green)}.msym-row.conflict{color:var(--red)}.msym-row.empty{color:var(--red)}
+.mlabel{font-size:11px;font-weight:700;color:#fff;padding:2px 6px;border-radius:3px;flex-shrink:0;min-width:32px;text-align:center;background:#E53E3E}
+.mcn{font-size:12px;color:var(--text3)}
+.cbox{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+.cbox-item{padding:12px;border-radius:8px;font-size:13px;line-height:1.7}
+.cbox-q{background:#FFF5F5;border:1px solid #FED7D7}
+.cbox-p{background:var(--accent-light);border:1px solid #BEE3F8}
+.cbox-p.none{background:#F7FAFC;border-color:#CBD5E0}
+.cbox-label{font-size:11px;font-weight:700;letter-spacing:1px;margin-bottom:4px;color:var(--text3)}
+.jbox{margin-top:12px;padding:14px;border-radius:8px;font-size:13px;line-height:2}
+.jbox.true{background:var(--green-bg);border:1px solid var(--green-bd)}
+.jbox.false{background:var(--red-bg);border:1px solid var(--red-bd)}
+.jbox.ng{background:var(--orange-bg);border:1px solid var(--orange-bd)}
+.jicon{width:32px;height:32px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:16px;margin-right:8px;vertical-align:middle}
+.true .jicon{background:#C6F6D5}.false .jicon{background:#FED7D7}.ng .jicon{background:#FEFCBF}
+.mtag{display:inline-flex;padding:3px 8px;border-radius:16px;font-size:11px;font-weight:600;margin:4px 2px 0}
+.mtag.skill{background:#BEE3F8;color:#2B6CB0}.mtag.trap{background:#FED7D7;color:#9B2C2C}.mtag.method{background:#E9D8FD;color:#553C9A}
+.answer-sec{padding:18px 20px;border-top:1px solid var(--border);display:none}
+.answer-sec.show{display:block}
+.answer-prompt{font-size:13px;color:var(--text2);margin-bottom:10px;font-weight:500}
+.answer-opts{display:flex;gap:8px}
+.abtn{flex:1;padding:11px;border:2px solid var(--border);border-radius:8px;background:#fff;font-size:13px;font-weight:600;cursor:pointer;transition:.2s;text-align:center;font-family:inherit}
+.abtn:hover{border-color:var(--accent);background:var(--accent-light)}
+.abtn.correct{border-color:var(--green);background:var(--green-bg);color:var(--green)}
+.abtn.wrong{border-color:var(--red);background:var(--red-bg);color:var(--red)}
+.abtn:disabled{cursor:default;opacity:.5}.abtn.correct:disabled,.abtn.wrong:disabled{opacity:1}
+.ares{margin-top:12px;padding:10px 14px;border-radius:8px;font-size:13px;font-weight:500;display:none;line-height:1.6}
+.ares.show{display:block}
+.ares.ok{background:var(--green-bg);border:1px solid var(--green-bd);color:var(--green)}
+.ares.no{background:var(--red-bg);border:1px solid var(--red-bd);color:var(--red)}
+.reveal-wrap{display:none}.reveal-wrap.show{display:block}
+.next-sec{padding:18px 20px;text-align:center;display:none}.next-sec.show{display:block}
+.next-btn{background:linear-gradient(135deg,#2B6CB0,#3182CE);color:#fff;border:none;padding:12px 40px;border-radius:24px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;box-shadow:0 4px 14px rgba(43,108,176,.3);transition:.2s}
+.next-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(43,108,176,.4)}
+.score{background:var(--card);margin:12px;border-radius:var(--r);box-shadow:var(--shadow);padding:28px 20px;text-align:center;display:none}.score.show{display:block}
+.score-emoji{font-size:44px;margin-bottom:12px}
+.score-title{font-family:'Noto Serif SC',serif;font-size:18px;font-weight:700;margin-bottom:6px}
+.score-stats{display:flex;justify-content:center;gap:28px;margin:16px 0}
+.stat-n{font-size:26px;font-weight:700}.stat-n.g{color:var(--green)}.stat-n.r{color:var(--red)}
+.stat-l{font-size:11px;color:var(--text3);margin-top:2px}
+.weak-box{background:var(--orange-bg);border:1px solid var(--orange-bd);border-radius:8px;padding:14px;text-align:left;margin-top:14px}
+.weak-title{font-size:12px;font-weight:700;color:var(--orange);margin-bottom:4px}
+.weak-text{font-size:12px;color:#744210;line-height:1.7}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}.fade-in{animation:fadeIn .4s ease forwards}
+</style>
+</head>
+<body>
+<div class="header">
+<h1>阅读判断 · 解题思路训练</h1>
+<div class="sub">自考英语（专升本）（13000）· 2014年4月 · Running: Sport or Way of Life?</div>
+</div>
+<a class="back-link" href="index.html">← 返回目录</a>
+<div class="progress" id="prog"></div>
+<div class="container" id="app"></div>
+
+<script>
+const EXAM={id:"2014-04",title:"2014年4月",subtitle:"Running: Sport or Way of Life?",
+passage:`<p><span class="sent" id="s1">You go through the channels several times and find that once again there's nothing on TV that interests you.</span> <span class="sent" id="s2">Not a problem!</span> <span class="sent" id="s3">Just put on some running shoes and comfortable clothes and go for a run.</span></p>
+<p><span class="sent" id="s4">One of the best things about the sport of running is that you don't need expensive equipment.</span> <span class="sent" id="s5">All you need is a good pair of running shoes and a safe environment.</span> <span class="sent" id="s6">But don't be fooled into thinking the sport of running is easy.</span> <span class="sent" id="s7">It requires discipline and concentration.</span></p>
+<p><span class="sent" id="s8">Running is good for you both physically and mentally.</span> <span class="sent" id="s9">It strengthens your heart, lungs, and muscles.</span> <span class="sent" id="s10">It makes you more aware of your body.</span> <span class="sent" id="s11">Running also improves your body so that you don't get sick easily.</span> <span class="sent" id="s12">It can even help you to stay more focused in school because exercise helps you to think more clearly.</span></p>
+<p><span class="sent" id="s13">How do you get engaged in the sport if you don't know much about it?</span> <span class="sent" id="s14">Most schools offer running programs.</span> <span class="sent" id="s15">A simple Internet search can help you find some in your area.</span> <span class="sent" id="s16">The programs show you how running can offer competition or just be for fun.</span> <span class="sent" id="s17">They also teach runners to set practical goals and take care of their bodies.</span></p>
+<p><span class="sent" id="s18">Runners have great respect for each other because they know how difficult the sport can be.</span> <span class="sent" id="s19">If you go to a race, you'll see people cheering for all the runners.</span> <span class="sent" id="s20">Running isn't always about how fast you are running or how far you're going.</span> <span class="sent" id="s21">It's about getting out there and doing it.</span> <span class="sent" id="s22">Participation is more important than competition, and effort is recognized over talent.</span></p>
+<p><span class="sent" id="s23">If you're looking for more than just a sport, running may be the perfect choice for you.</span></p>`,
+
+questions:[
+// ── Q1 TRUE ──
+{num:1,text:"You may find it interesting to go for a run.",answer:"TRUE",hl:["s1","s3"],
+step1:`题目中的关键信息：<br><br>
+<div style="font-size:15px;line-height:1.9;color:var(--text)">You may find it <span class="hl-b">interesting</span> to <span class="hl-a">go for a run</span>.</div><br>
+<strong>定位策略：用核心动词短语定位。</strong>搜索 <span class="hl-a">go for a run</span> 或 <span class="hl-b">interesting / interests</span>。`,
+step2:`定位到第一段第1句和第3句：<br><br>
+<div style="font-size:14px;line-height:1.9;color:var(--text)">"there's nothing on TV that <span class="hl-b">interests</span> you. Not a problem! Just put on some running shoes and comfortable clothes and <span class="hl-a">go for a run</span>."</div>
+<div class="mlist">
+<div class="mitem"><div class="mrow"><span class="mlabel">题干</span> <span class="hl-b">interesting</span> <span class="mcn">（有趣的）</span></div><div class="msym-row approx">≈</div><div class="mrow"><span class="mlabel">原文</span> <span class="hl-b">interests you</span> <span class="mcn">（让你感兴趣，同根词转换）</span></div></div>
+<div class="mitem"><div class="mrow"><span class="mlabel">题干</span> <span class="hl-a">go for a run</span></div><div class="msym-row equal">=</div><div class="mrow"><span class="mlabel">原文</span> <span class="hl-a">go for a run</span> <span class="mcn">（完全一致）</span></div></div>
+</div>
+<span class="hl-b">黄色</span>同根词转换（interesting ≈ interests），<span class="hl-a">蓝色</span>完全一致。原文语境：电视没什么有趣的→没关系→去跑步吧！暗示跑步是有趣的替代活动。`,
+step3:`<div class="cbox">
+<div class="cbox-item cbox-q"><div class="cbox-label">题干含义</div><div style="font-size:12px;color:var(--accent);margin-bottom:3px">You may find it <strong><span class="hl-b">interesting</span></strong> to <strong><span class="hl-a">go for a run</span></strong>.</div>你可能会觉得<span class="hl-a"><strong>去跑步</strong></span>是件<span class="hl-b"><strong>有趣的</strong></span>事。</div>
+<div class="cbox-item cbox-p"><div class="cbox-label">原文含义</div><div style="font-size:12px;color:var(--accent);margin-bottom:3px">Nothing on TV <strong><span class="hl-b">interests</span></strong> you... Just <strong><span class="hl-a">go for a run</span></strong>.</div>电视没什么能让你<span class="hl-b"><strong>感兴趣的</strong></span>→没关系→去<span class="hl-a"><strong>跑步</strong></span>吧！</div>
+</div>
+<div class="jbox true"><strong>关系判断：含义一致 ✅</strong><br><br>
+<strong>interesting</strong> ≈ <strong>interests</strong>（同根词：形容词 ↔ 动词，都表示"有趣"）<br>
+<strong>go for a run</strong> = <strong>go for a run</strong>（完全一致）<br><br>
+原文用"电视没趣→去跑步"的逻辑暗示跑步是有趣的选择，题干说"你可能觉得跑步有趣"——含义一致。<br>
+<span class="mtag method">核心方法：同根词转换识别（interesting ↔ interests）</span></div>`,
+step4:`<div class="jbox true"><span class="jicon">✓</span><strong>答案：TRUE</strong><br><br>
+interesting和interests是同根词转换（形容词↔动词）。原文暗示跑步是无聊电视的有趣替代，题干的"find it interesting"与此一致。<br>
+<span class="mtag skill">同根词转换</span></div>`},
+
+// ── Q2 FALSE ──
+{num:2,text:"The sport of running is easy.",answer:"FALSE",hl:["s6","s7"],
+step1:`题目中的关键信息：<br><br>
+<div style="font-size:15px;line-height:1.9;color:var(--text)">The <span class="hl-a">sport of running</span> is <span class="hl-x">easy</span>.</div><br>
+<strong>定位策略：用核心名词+形容词定位。</strong>搜索 <span class="hl-a">sport of running</span> + <span class="hl-x">easy</span> 或其反义词。`,
+step2:`定位到第二段第3句：<br><br>
+<div style="font-size:14px;line-height:1.9;color:var(--text)">"But <span class="hl-b">don't be fooled into thinking</span> the <span class="hl-a">sport of running</span> is <span class="hl-x">easy</span>. It <span class="hl-b">requires discipline and concentration</span>."</div>
+<div class="mlist">
+<div class="mitem"><div class="mrow"><span class="mlabel">题干</span> <span class="hl-a">sport of running</span></div><div class="msym-row equal">=</div><div class="mrow"><span class="mlabel">原文</span> <span class="hl-a">sport of running</span> <span class="mcn">（完全一致）</span></div></div>
+<div class="mitem conflict"><div class="mrow"><span class="mlabel">题干</span> <span class="hl-x">is easy</span> <span class="mcn">（是容易的）</span></div><div class="msym-row conflict">✗</div><div class="mrow"><span class="mlabel">原文</span> <span class="hl-b">don't be fooled into thinking...is easy</span> <span class="mcn">（别以为容易——直接否定）</span></div></div>
+</div>
+<span class="hl-a">蓝色</span>完全一致，但<span class="hl-x">红色</span>被原文直接否定——"别以为容易"就是在说"不容易"。`,
+step3:`<div class="cbox">
+<div class="cbox-item cbox-q"><div class="cbox-label">题干含义</div><div style="font-size:12px;color:var(--accent);margin-bottom:3px">The <strong><span class="hl-a">sport of running</span></strong> is <strong><span class="hl-x">easy</span></strong>.</div><span class="hl-a"><strong>跑步运动</strong></span><span class="hl-x"><strong>很容易</strong></span>。</div>
+<div class="cbox-item cbox-p"><div class="cbox-label">原文含义</div><div style="font-size:12px;color:var(--accent);margin-bottom:3px"><strong><span class="hl-b">Don't be fooled into thinking</span></strong> the <strong><span class="hl-a">sport of running</span></strong> is <strong><span class="hl-x">easy</span></strong>. It <strong><span class="hl-b">requires discipline and concentration</span></strong>.</div><span class="hl-b"><strong>别以为</strong></span><span class="hl-a"><strong>跑步运动</strong></span><span class="hl-x"><strong>容易</strong></span>，它<span class="hl-b"><strong>需要自律和专注</strong></span>。</div>
+</div>
+<div class="jbox false"><strong>关系判断：含义矛盾 ❌</strong><br><br>
+<strong>sport of running</strong> = <strong>sport of running</strong>（对象一致 ✅）<br>
+<strong><span class="hl-x">is easy</span></strong> ✗ <strong><span class="hl-b">don't be fooled into thinking...is easy</span></strong>（<strong>关键矛盾！</strong>"容易" vs "别以为容易"——原文直接否定了easy）<br><br>
+原文还给出反面证据：requires discipline and concentration（需要自律和专注），进一步说明不容易。<br>
+<span class="mtag trap">核心陷阱：直接否定（don't be fooled into thinking X = X is not true）</span></div>`,
+step4:`<div class="jbox false"><span class="jicon">✗</span><strong>答案：FALSE</strong><br><br>
+原文原话就是"别以为跑步容易"——don't be fooled into thinking...is easy，直接否定了题干的"is easy"。后面还补充"需要自律和专注"作为反面证据。<br>
+<span class="mtag skill">否定句识别</span><span class="mtag trap">直接否定</span></div>`},
+
+// ── Q3 NOT GIVEN ──
+{num:3,text:"It is hard to find a safe environment for running.",answer:"NOT GIVEN",hl:["s5"],
+step1:`题目中的关键信息：<br><br>
+<div style="font-size:15px;line-height:1.9;color:var(--text)">It is <span class="hl-g">hard to find</span> a <span class="hl-a">safe environment</span> for running.</div><br>
+<strong>定位策略：用核心名词定位。</strong>搜索 <span class="hl-a">safe environment</span>。<span class="hl-g">hard to find</span> 标灰色——需要验证原文是否评价了"难不难找"。`,
+step2:`定位到第二段第2句：<br><br>
+<div style="font-size:14px;line-height:1.9;color:var(--text)">"All you need is a good pair of running shoes and a <span class="hl-a">safe environment</span>."</div>
+<div class="mlist">
+<div class="mitem"><div class="mrow"><span class="mlabel">题干</span> <span class="hl-a">safe environment</span> <span class="mcn">（安全的环境）</span></div><div class="msym-row equal">=</div><div class="mrow"><span class="mlabel">原文</span> <span class="hl-a">safe environment</span> <span class="mcn">（完全一致）</span></div></div>
+<div class="mitem conflict"><div class="mrow"><span class="mlabel">题干</span> <span class="hl-g">hard to find</span> <span class="mcn">（很难找到）</span></div><div class="msym-row empty">∅</div><div class="mrow"><span class="mlabel">原文</span> <span class="mcn" style="color:var(--red)">原文只说"需要安全环境"，未评价找到它是否困难</span></div></div>
+</div>
+<span class="hl-a">蓝色</span>找到了，但<span class="hl-g">灰色</span>"hard to find"在原文中无任何对应——原文只说你需要它，没说好不好找。`,
+step3:`<div class="cbox">
+<div class="cbox-item cbox-q"><div class="cbox-label">题干含义</div><div style="font-size:12px;color:var(--accent);margin-bottom:3px">It is <strong><span class="hl-g">hard to find</span></strong> a <strong><span class="hl-a">safe environment</span></strong> for running.</div><span class="hl-g"><strong>很难找到</strong></span>一个适合跑步的<span class="hl-a"><strong>安全环境</strong></span>。</div>
+<div class="cbox-item cbox-p none"><div class="cbox-label">原文含义</div><div style="font-size:12px;color:var(--text3);margin-bottom:3px;font-style:italic">（原文无关于"是否难找"的表述）</div><span style="color:var(--text3)">原文只提到跑步需要"a safe environment"，是在列举跑步所需条件，对于找到安全环境"难不难"未做任何评价。</span></div>
+</div>
+<div class="jbox ng"><strong>关系判断：无法比较 ⚠️</strong><br><br>
+<strong>safe environment</strong> = 原文找到了 ✅<br>
+<strong><span class="hl-g">hard to find</span></strong> → 原文搜索 hard / difficult / easy to find → <strong>均未出现</strong>（∅）<br><br>
+"需要安全环境" ≠ "安全环境难找"。原文只说了"你需要什么"，没评价"好不好得到"。<br>
+<span class="mtag method">核心方法：同义词扫读失败 → 大概率NOT GIVEN</span></div>`,
+step4:`<div class="jbox ng"><span class="jicon">?</span><strong>答案：NOT GIVEN</strong><br><br>
+原文提到safe environment是在列举跑步需要的东西（鞋+环境），对这个环境"好不好找"只字未提。"需要X" ≠ "X很难得到"。<br>
+<span class="mtag skill">需求陈述≠难度评价</span></div>`},
+
+// ── Q4 TRUE ──
+{num:4,text:"Running is good to people's body and mind.",answer:"TRUE",hl:["s8"],
+step1:`题目中的关键信息：<br><br>
+<div style="font-size:15px;line-height:1.9;color:var(--text)"><span class="hl-a">Running</span> is <span class="hl-b">good</span> to people's <span class="hl-c">body</span> and <span class="hl-c">mind</span>.</div><br>
+<strong>定位策略：用核心名词组合定位。</strong>搜索 <span class="hl-a">running</span> + <span class="hl-b">good</span> + <span class="hl-c">body/mind</span> 或其近义词。`,
+step2:`定位到第三段第1句：<br><br>
+<div style="font-size:14px;line-height:1.9;color:var(--text)">"<span class="hl-a">Running</span> is <span class="hl-b">good for</span> you both <span class="hl-c">physically</span> and <span class="hl-c">mentally</span>."</div>
+<div class="mlist">
+<div class="mitem"><div class="mrow"><span class="mlabel">题干</span> <span class="hl-a">Running</span></div><div class="msym-row equal">=</div><div class="mrow"><span class="mlabel">原文</span> <span class="hl-a">Running</span> <span class="mcn">（完全一致）</span></div></div>
+<div class="mitem"><div class="mrow"><span class="mlabel">题干</span> <span class="hl-b">good to</span> <span class="mcn">（有好处）</span></div><div class="msym-row approx">≈</div><div class="mrow"><span class="mlabel">原文</span> <span class="hl-b">good for</span> <span class="mcn">（对……有好处，介词不同但含义相同）</span></div></div>
+<div class="mitem"><div class="mrow"><span class="mlabel">题干</span> <span class="hl-c">body and mind</span> <span class="mcn">（身体和心理）</span></div><div class="msym-row approx">≈</div><div class="mrow"><span class="mlabel">原文</span> <span class="hl-c">physically and mentally</span> <span class="mcn">（体能上和精神上）</span></div></div>
+</div>
+三组全部对应：<span class="hl-a">蓝色</span>一致，<span class="hl-b">黄色</span>介词小异但含义同，<span class="hl-c">绿色</span>词性转换同义（名词↔副词）。`,
+step3:`<div class="cbox">
+<div class="cbox-item cbox-q"><div class="cbox-label">题干含义</div><div style="font-size:12px;color:var(--accent);margin-bottom:3px"><strong><span class="hl-a">Running</span></strong> is <strong><span class="hl-b">good</span></strong> to people's <strong><span class="hl-c">body</span></strong> and <strong><span class="hl-c">mind</span></strong>.</div><span class="hl-a"><strong>跑步</strong></span>对人的<span class="hl-c"><strong>身体</strong></span>和<span class="hl-c"><strong>心理</strong></span>都<span class="hl-b"><strong>有好处</strong></span>。</div>
+<div class="cbox-item cbox-p"><div class="cbox-label">原文含义</div><div style="font-size:12px;color:var(--accent);margin-bottom:3px"><strong><span class="hl-a">Running</span></strong> is <strong><span class="hl-b">good for</span></strong> you both <strong><span class="hl-c">physically</span></strong> and <strong><span class="hl-c">mentally</span></strong>.</div><span class="hl-a"><strong>跑步</strong></span>在<span class="hl-c"><strong>身体</strong></span>和<span class="hl-c"><strong>心理</strong></span>上都对你<span class="hl-b"><strong>有好处</strong></span>。</div>
+</div>
+<div class="jbox true"><strong>关系判断：含义一致 ✅</strong><br><br>
+<strong>Running</strong> = <strong>Running</strong>（完全一致）<br>
+<strong>good to</strong> ≈ <strong>good for</strong>（介词不同，含义相同）<br>
+<strong>body</strong> ≈ <strong>physically</strong>（身体 ≈ 体能上，名词↔副词转换）<br>
+<strong>mind</strong> ≈ <strong>mentally</strong>（心理 ≈ 精神上，名词↔副词转换）<br><br>
+对象、评价、涵盖范围全部吻合——含义完全一致。<br>
+<span class="mtag method">核心方法：词性转换型同义（body↔physically, mind↔mentally）</span></div>`,
+step4:`<div class="jbox true"><span class="jicon">✓</span><strong>答案：TRUE</strong><br><br>
+经典的词性转换同义：body≈physically，mind≈mentally。名词和副词形式不同，但说的是同一回事。<br>
+<span class="mtag skill">词性转换同义</span></div>`},
+
+// ── Q5 NOT GIVEN ──
+{num:5,text:"A long-distance run is good in many ways.",answer:"NOT GIVEN",hl:[],
+step1:`题目中的关键信息：<br><br>
+<div style="font-size:15px;line-height:1.9;color:var(--text)">A <span class="hl-g">long-distance</span> run is <span class="hl-b">good in many ways</span>.</div><br>
+<strong>定位策略：用核心概念词扫读。</strong>搜索 <span class="hl-g">long-distance</span> 及其近义词（long / far / distance / marathon）。全文中出现过"how far you're going"但语境不同。`,
+step2:`搜索 <span class="hl-g">long-distance</span> / <span class="hl-g">long run</span> / <span class="hl-g">marathon</span> — <strong>全文均未出现"长跑"这一特指概念。</strong>
+<div class="mlist">
+<div class="mitem conflict"><div class="mrow"><span class="mlabel">题干</span> <span class="hl-g">long-distance run</span> <span class="mcn">（长跑）</span></div><div class="msym-row empty">∅</div><div class="mrow"><span class="mlabel">原文</span> <span class="mcn" style="color:var(--red)">原文讨论的是"跑步"整体（running），从未特指"长跑"</span></div></div>
+</div>
+题干加了 <span class="hl-g">long-distance</span> 这个限定词，把"跑步"缩小为"长跑"。原文没有讨论这个特定类型。`,
+step3:`<div class="cbox">
+<div class="cbox-item cbox-q"><div class="cbox-label">题干含义</div><div style="font-size:12px;color:var(--accent);margin-bottom:3px">A <strong><span class="hl-g">long-distance</span></strong> run is <strong><span class="hl-b">good in many ways</span></strong>.</div><span class="hl-g"><strong>长跑</strong></span>在很多方面<span class="hl-b"><strong>有好处</strong></span>。</div>
+<div class="cbox-item cbox-p none"><div class="cbox-label">原文含义</div><div style="font-size:12px;color:var(--text3);margin-bottom:3px;font-style:italic">（原文无"长跑"相关表述）</div><span style="color:var(--text3)">原文说"running is good for you both physically and mentally"，讨论的是跑步整体，从未特指长跑。</span></div>
+</div>
+<div class="jbox ng"><strong>关系判断：无法比较 ⚠️</strong><br><br>
+<strong><span class="hl-g">long-distance</span></strong> → 原文中搜索 long / distance / far → <strong>未作为长跑的限定出现</strong>（∅）<br><br>
+"跑步有好处"≠"长跑有好处"。题干偷偷加了一个限定词（long-distance），把范围缩小了，而原文没有讨论这个子类别。<br><br>
+⚠️ <strong>易错提醒：</strong>原文确实说了running有很多好处，但题干说的是long-distance run。多了一个限定词就变成了不同的话题。<br>
+<span class="mtag method">核心方法：限定词添加 → 话题改变 → 大概率NOT GIVEN</span></div>`,
+step4:`<div class="jbox ng"><span class="jicon">?</span><strong>答案：NOT GIVEN</strong><br><br>
+题干在"run"前面加了"long-distance"，把泛指的跑步缩小为长跑。原文从头到尾讨论的都是跑步整体，没有专门说长跑好不好。加限定词=换话题。<br>
+<span class="mtag skill">限定词敏感</span><span class="mtag trap">限定词添加</span></div>`},
+
+// ── Q6 TRUE ──
+{num:6,text:"You can find running programs online.",answer:"TRUE",hl:["s15"],
+step1:`题目中的关键信息：<br><br>
+<div style="font-size:15px;line-height:1.9;color:var(--text)">You can <span class="hl-b">find</span> <span class="hl-a">running programs</span> <span class="hl-c">online</span>.</div><br>
+<strong>定位策略：用核心名词定位。</strong>搜索 <span class="hl-a">running programs</span> 或 <span class="hl-c">online / Internet</span>。`,
+step2:`定位到第四段第2句：<br><br>
+<div style="font-size:14px;line-height:1.9;color:var(--text)">"A simple <span class="hl-c">Internet search</span> can <span class="hl-b">help you find</span> <span class="hl-a">some</span> in your area."</div>
+<div class="mlist">
+<div class="mitem"><div class="mrow"><span class="mlabel">题干</span> <span class="hl-a">running programs</span> <span class="mcn">（跑步项目）</span></div><div class="msym-row approx">≈</div><div class="mrow"><span class="mlabel">原文</span> <span class="hl-a">some</span> <span class="mcn">（一些，指代上文的running programs）</span></div></div>
+<div class="mitem"><div class="mrow"><span class="mlabel">题干</span> <span class="hl-b">find</span> <span class="mcn">（找到）</span></div><div class="msym-row approx">≈</div><div class="mrow"><span class="mlabel">原文</span> <span class="hl-b">help you find</span> <span class="mcn">（帮你找到，含义相近）</span></div></div>
+<div class="mitem"><div class="mrow"><span class="mlabel">题干</span> <span class="hl-c">online</span> <span class="mcn">（在线）</span></div><div class="msym-row approx">≈</div><div class="mrow"><span class="mlabel">原文</span> <span class="hl-c">Internet search</span> <span class="mcn">（网络搜索，同义）</span></div></div>
+</div>
+三组全部对应：<span class="hl-a">蓝色</span>代词指代，<span class="hl-b">黄色</span>含义相近，<span class="hl-c">绿色</span>同义。`,
+step3:`<div class="cbox">
+<div class="cbox-item cbox-q"><div class="cbox-label">题干含义</div><div style="font-size:12px;color:var(--accent);margin-bottom:3px">You can <strong><span class="hl-b">find</span></strong> <strong><span class="hl-a">running programs</span></strong> <strong><span class="hl-c">online</span></strong>.</div>你可以在<span class="hl-c"><strong>网上</strong></span><span class="hl-b"><strong>找到</strong></span><span class="hl-a"><strong>跑步项目</strong></span>。</div>
+<div class="cbox-item cbox-p"><div class="cbox-label">原文含义</div><div style="font-size:12px;color:var(--accent);margin-bottom:3px">A simple <strong><span class="hl-c">Internet search</span></strong> can <strong><span class="hl-b">help you find</span></strong> <strong><span class="hl-a">some</span></strong> in your area.</div>简单的<span class="hl-c"><strong>网络搜索</strong></span>就能<span class="hl-b"><strong>帮你找到</strong></span>你所在地区的<span class="hl-a"><strong>一些（跑步项目）</strong></span>。</div>
+</div>
+<div class="jbox true"><strong>关系判断：含义一致 ✅</strong><br><br>
+<strong>running programs</strong> ≈ <strong>some</strong>（代词指代上文的running programs）<br>
+<strong>find</strong> ≈ <strong>help you find</strong>（含义一致）<br>
+<strong>online</strong> ≈ <strong>Internet search</strong>（在线 ≈ 网络搜索）<br><br>
+三组全部对应——含义完全一致。<br>
+<span class="mtag method">核心方法：代词指代识别 + 同义改写</span></div>`,
+step4:`<div class="jbox true"><span class="jicon">✓</span><strong>答案：TRUE</strong><br><br>
+online ≈ Internet search是关键同义对。注意"some"指代的是上文的running programs——代词指代也是常考的同义改写形式。<br>
+<span class="mtag skill">代词指代识别</span></div>`},
+
+// ── Q7 FALSE ──
+{num:7,text:"Running programs set goals for you.",answer:"FALSE",hl:["s17"],
+step1:`题目中的关键信息：<br><br>
+<div style="font-size:15px;line-height:1.9;color:var(--text)"><span class="hl-a">Running programs</span> <span class="hl-x">set goals for you</span>.</div><br>
+<strong>定位策略：用核心名词定位。</strong>搜索 <span class="hl-a">programs</span> + <span class="hl-x">goals</span>。<br><br>
+⚠️ 注意 <span class="hl-x">set goals for you</span>（替你设定目标）——谁在设目标？是programs替你设，还是你自己设？`,
+step2:`定位到第四段第4句：<br><br>
+<div style="font-size:14px;line-height:1.9;color:var(--text)">"<span class="hl-a">They</span> also <span class="hl-b">teach runners to set</span> <span class="hl-c">practical goals</span> and take care of their bodies."</div>
+<div class="mlist">
+<div class="mitem"><div class="mrow"><span class="mlabel">题干</span> <span class="hl-a">running programs</span> <span class="mcn">（跑步项目）</span></div><div class="msym-row approx">≈</div><div class="mrow"><span class="mlabel">原文</span> <span class="hl-a">they</span> <span class="mcn">（它们，指代running programs）</span></div></div>
+<div class="mitem conflict"><div class="mrow"><span class="mlabel">题干</span> <span class="hl-x">set goals for you</span> <span class="mcn">（替你设定目标）</span></div><div class="msym-row conflict">✗</div><div class="mrow"><span class="mlabel">原文</span> <span class="hl-b">teach runners to set goals</span> <span class="mcn">（教跑步者自己设定目标）</span></div></div>
+</div>
+<span class="hl-a">蓝色</span>主语对应，但<span class="hl-x">红色</span>出现关键矛盾——题干说programs"替你设目标"，原文说programs"教你自己设目标"。"替你做"≠"教你做"。`,
+step3:`<div class="cbox">
+<div class="cbox-item cbox-q"><div class="cbox-label">题干含义</div><div style="font-size:12px;color:var(--accent);margin-bottom:3px"><strong><span class="hl-a">Running programs</span></strong> <strong><span class="hl-x">set goals for you</span></strong>.</div><span class="hl-a"><strong>跑步项目</strong></span><span class="hl-x"><strong>替你设定目标</strong></span>。</div>
+<div class="cbox-item cbox-p"><div class="cbox-label">原文含义</div><div style="font-size:12px;color:var(--accent);margin-bottom:3px"><strong><span class="hl-a">They</span></strong> also <strong><span class="hl-b">teach runners to set</span></strong> <strong><span class="hl-c">practical goals</span></strong>.</div><span class="hl-a"><strong>它们（跑步项目）</strong></span><span class="hl-b"><strong>教跑步者自己设定</strong></span><span class="hl-c"><strong>切实可行的目标</strong></span>。</div>
+</div>
+<div class="jbox false"><strong>关系判断：含义矛盾 ❌</strong><br><br>
+<strong>running programs</strong> ≈ <strong>they</strong>（主语一致 ✅）<br>
+<strong><span class="hl-x">set goals for you</span></strong>（替你设定）✗ <strong><span class="hl-b">teach runners to set goals</span></strong>（教你自己设定）— <strong>关键矛盾！</strong><br><br>
+"替你做"和"教你做"是完全不同的动作：前者是programs做主角，后者是runners做主角。题干偷换了动作的执行者。<br>
+<span class="mtag trap">核心陷阱：动作主体偷换（teach to do ≠ do for you）</span></div>`,
+step4:`<div class="jbox false"><span class="jicon">✗</span><strong>答案：FALSE</strong><br><br>
+"教你设目标"（teach to set）≠"替你设目标"（set for you）。原文说的是programs教会runners自己设定目标，学习的主动权在runner手里。题干把动作执行者从runner偷换成了program。<br>
+<span class="mtag skill">动作主体识别</span><span class="mtag trap">动作主体偷换</span></div>`},
+
+// ── Q8 NOT GIVEN ──
+{num:8,text:"You should go for a run every day.",answer:"NOT GIVEN",hl:[],
+step1:`题目中的关键信息：<br><br>
+<div style="font-size:15px;line-height:1.9;color:var(--text)">You should go for a run <span class="hl-g">every day</span>.</div><br>
+<strong>定位策略：用核心概念词扫读。</strong>搜索 <span class="hl-g">every day</span> 及其近义词（daily / regularly / frequency / often / always）。`,
+step2:`搜索 <span class="hl-g">every day</span> / <span class="hl-g">daily</span> / <span class="hl-g">often</span> / <span class="hl-g">regularly</span> — <strong>全文均未出现任何关于跑步频率的表述。</strong>
+<div class="mlist">
+<div class="mitem conflict"><div class="mrow"><span class="mlabel">题干</span> <span class="hl-g">every day</span> <span class="mcn">（每天）</span></div><div class="msym-row empty">∅</div><div class="mrow"><span class="mlabel">原文</span> <span class="mcn" style="color:var(--red)">全文未讨论跑步频率</span></div></div>
+</div>
+题干的核心限定 <span class="hl-g">every day</span> 在全文中无任何对应。原文讨论了跑步的好处、方法和精神，但从未建议"多久跑一次"。`,
+step3:`<div class="cbox">
+<div class="cbox-item cbox-q"><div class="cbox-label">题干含义</div><div style="font-size:12px;color:var(--accent);margin-bottom:3px">You should go for a run <strong><span class="hl-g">every day</span></strong>.</div>你应该<span class="hl-g"><strong>每天</strong></span>去跑步。</div>
+<div class="cbox-item cbox-p none"><div class="cbox-label">原文含义</div><div style="font-size:12px;color:var(--text3);margin-bottom:3px;font-style:italic">（原文无关于跑步频率的表述）</div><span style="color:var(--text3)">原文鼓励人们去跑步，讨论了跑步的种种好处，但从未提及应该多久跑一次。</span></div>
+</div>
+<div class="jbox ng"><strong>关系判断：无法比较 ⚠️</strong><br><br>
+<strong><span class="hl-g">every day</span></strong> → 原文搜索 daily / regularly / frequency → <strong>均未出现</strong>（∅）<br><br>
+原文只说"跑步好"，没说"应该天天跑"。鼓励做某事 ≠ 建议每天做。<br>
+<span class="mtag method">核心方法：同义词扫读失败 → 大概率NOT GIVEN</span></div>`,
+step4:`<div class="jbox ng"><span class="jicon">?</span><strong>答案：NOT GIVEN</strong><br><br>
+原文全篇没提到跑步频率。"跑步有好处" ≠ "应该每天跑"。不要用常识推断频率建议——原文没说就是没说。<br>
+<span class="mtag skill">频率/程度词敏感</span></div>`},
+
+// ── Q9 FALSE ──
+{num:9,text:"Runners respect one another as they love the sport.",answer:"FALSE",hl:["s18"],
+step1:`题目中的关键信息：<br><br>
+<div style="font-size:15px;line-height:1.9;color:var(--text)"><span class="hl-a">Runners</span> <span class="hl-b">respect one another</span> <span class="hl-x">as they love the sport</span>.</div><br>
+<strong>定位策略：用核心名词定位。</strong>搜索 <span class="hl-a">runners</span> + <span class="hl-b">respect</span>。<br><br>
+⚠️ 注意 <span class="hl-x">as they love the sport</span>（因为热爱运动）——这是给出的原因，需要验证原文的原因是否相同。`,
+step2:`定位到第五段第1句：<br><br>
+<div style="font-size:14px;line-height:1.9;color:var(--text)">"<span class="hl-a">Runners</span> have <span class="hl-b">great respect for each other</span> <span class="hl-c">because they know how difficult the sport can be</span>."</div>
+<div class="mlist">
+<div class="mitem"><div class="mrow"><span class="mlabel">题干</span> <span class="hl-a">Runners</span></div><div class="msym-row equal">=</div><div class="mrow"><span class="mlabel">原文</span> <span class="hl-a">Runners</span> <span class="mcn">（完全一致）</span></div></div>
+<div class="mitem"><div class="mrow"><span class="mlabel">题干</span> <span class="hl-b">respect one another</span> <span class="mcn">（互相尊重）</span></div><div class="msym-row approx">≈</div><div class="mrow"><span class="mlabel">原文</span> <span class="hl-b">have great respect for each other</span> <span class="mcn">（对彼此非常尊重）</span></div></div>
+<div class="mitem conflict"><div class="mrow"><span class="mlabel">题干</span> <span class="hl-x">as they love the sport</span> <span class="mcn">（因为他们热爱这项运动）</span></div><div class="msym-row conflict">✗</div><div class="mrow"><span class="mlabel">原文</span> <span class="hl-c">because they know how difficult the sport can be</span> <span class="mcn">（因为他们知道这项运动有多难）</span></div></div>
+</div>
+<span class="hl-a">蓝色</span>一致，<span class="hl-b">黄色</span>同义，但<span class="hl-x">红色</span>原因被偷换——题干说"因为热爱"，原文说"因为了解其艰难"。`,
+step3:`<div class="cbox">
+<div class="cbox-item cbox-q"><div class="cbox-label">题干含义</div><div style="font-size:12px;color:var(--accent);margin-bottom:3px"><strong><span class="hl-a">Runners</span></strong> <strong><span class="hl-b">respect one another</span></strong> <strong><span class="hl-x">as they love the sport</span></strong>.</div><span class="hl-a"><strong>跑步者</strong></span>互相<span class="hl-b"><strong>尊重</strong></span>，<span class="hl-x"><strong>因为他们热爱这项运动</strong></span>。</div>
+<div class="cbox-item cbox-p"><div class="cbox-label">原文含义</div><div style="font-size:12px;color:var(--accent);margin-bottom:3px"><strong><span class="hl-a">Runners</span></strong> have <strong><span class="hl-b">great respect for each other</span></strong> <strong><span class="hl-c">because they know how difficult the sport can be</span></strong>.</div><span class="hl-a"><strong>跑步者</strong></span>非常<span class="hl-b"><strong>尊重彼此</strong></span>，<span class="hl-c"><strong>因为他们知道这项运动有多艰难</strong></span>。</div>
+</div>
+<div class="jbox false"><strong>关系判断：含义矛盾 ❌</strong><br><br>
+<strong>Runners</strong> = <strong>Runners</strong>（主语一致 ✅）<br>
+<strong>respect one another</strong> ≈ <strong>have great respect for each other</strong>（互相尊重 ✅）<br>
+<strong><span class="hl-x">as they love the sport</span></strong>（因为热爱运动）✗ <strong><span class="hl-c">because they know how difficult the sport can be</span></strong>（因为了解运动的艰难）— <strong>关键矛盾！原因被偷换</strong><br><br>
+事实部分（互相尊重）是对的，但原因被换了。原文明确给出的原因是"了解运动的艰难"，而非"热爱运动"。<br>
+<span class="mtag trap">核心陷阱：原因偷换（love ≠ know how difficult）</span></div>`,
+step4:`<div class="jbox false"><span class="jicon">✗</span><strong>答案：FALSE</strong><br><br>
+"互相尊重"是对的，但原因不对。原文说因为"知道这项运动有多难"，题干换成了"热爱运动"。做阅读判断要看完整句子，包括原因状语——事实对了但原因错了，整句仍然是FALSE。<br>
+<span class="mtag skill">原因状语核查</span><span class="mtag trap">原因偷换</span></div>`},
+
+// ── Q10 TRUE ──
+{num:10,text:"Running means more than a sport.",answer:"TRUE",hl:["s23"],
+step1:`题目中的关键信息：<br><br>
+<div style="font-size:15px;line-height:1.9;color:var(--text)"><span class="hl-a">Running</span> means <span class="hl-b">more than a sport</span>.</div><br>
+<strong>定位策略：用核心短语定位。</strong>搜索 <span class="hl-b">more than</span> + <span class="hl-a">sport</span>。`,
+step2:`定位到最后一段：<br><br>
+<div style="font-size:14px;line-height:1.9;color:var(--text)">"If you're looking for <span class="hl-b">more than just a sport</span>, <span class="hl-a">running</span> may be the perfect choice for you."</div>
+<div class="mlist">
+<div class="mitem"><div class="mrow"><span class="mlabel">题干</span> <span class="hl-a">Running</span></div><div class="msym-row equal">=</div><div class="mrow"><span class="mlabel">原文</span> <span class="hl-a">running</span> <span class="mcn">（完全一致）</span></div></div>
+<div class="mitem"><div class="mrow"><span class="mlabel">题干</span> <span class="hl-b">more than a sport</span> <span class="mcn">（不仅仅是运动）</span></div><div class="msym-row approx">≈</div><div class="mrow"><span class="mlabel">原文</span> <span class="hl-b">more than just a sport</span> <span class="mcn">（不仅仅是运动，多了个just）</span></div></div>
+</div>
+<span class="hl-a">蓝色</span>一致，<span class="hl-b">黄色</span>几乎完全一致（just是强调词，不改变含义）。`,
+step3:`<div class="cbox">
+<div class="cbox-item cbox-q"><div class="cbox-label">题干含义</div><div style="font-size:12px;color:var(--accent);margin-bottom:3px"><strong><span class="hl-a">Running</span></strong> means <strong><span class="hl-b">more than a sport</span></strong>.</div><span class="hl-a"><strong>跑步</strong></span>的意义<span class="hl-b"><strong>不仅仅是一项运动</strong></span>。</div>
+<div class="cbox-item cbox-p"><div class="cbox-label">原文含义</div><div style="font-size:12px;color:var(--accent);margin-bottom:3px">If you're looking for <strong><span class="hl-b">more than just a sport</span></strong>, <strong><span class="hl-a">running</span></strong> may be the perfect choice.</div>如果你想要的<span class="hl-b"><strong>不仅仅是一项运动</strong></span>，<span class="hl-a"><strong>跑步</strong></span>可能是完美的选择。</div>
+</div>
+<div class="jbox true"><strong>关系判断：含义一致 ✅</strong><br><br>
+<strong>Running</strong> = <strong>running</strong>（完全一致）<br>
+<strong>more than a sport</strong> ≈ <strong>more than just a sport</strong>（just是强调词，不影响含义）<br><br>
+题干直接概括了原文最后一句的核心意思——跑步不仅是运动，它的意义更大。<br>
+<span class="mtag method">核心方法：近同义表达识别（just为强调词，可忽略）</span></div>`,
+step4:`<div class="jbox true"><span class="jicon">✓</span><strong>答案：TRUE</strong><br><br>
+more than a sport ≈ more than just a sport，只差一个强调词just，含义完全相同。这也是全文的主题句——跑步不只是运动，更是一种生活方式。<br>
+<span class="mtag skill">强调词识别</span></div>`}
+]};
+
+// ═══════ RENDERING ENGINE (same as template) ═══════
+const S={cur:0,answers:{},steps:{},total:EXAM.questions.length};
+EXAM.questions.forEach((_,i)=>S.steps[i]=0);
+function init(){const prog=document.getElementById('prog');for(let i=0;i<S.total;i++){const d=document.createElement('div');d.className='dot'+(i===0?' active':'');d.id='dot'+i;d.textContent=i+1;d.onclick=()=>jumpTo(i);prog.appendChild(d)}const app=document.getElementById('app');EXAM.questions.forEach((q,i)=>{const card=document.createElement('div');card.className='qcard'+(i===0?' active fade-in':'');card.id='qcard'+i;card.innerHTML=buildCard(q,i);app.appendChild(card)});app.innerHTML+=`<div class="score" id="scoreCard"><div class="score-emoji" id="scoreEmoji">🎯</div><div class="score-title" id="scoreTitle">训练完成！</div><div class="score-stats"><div><div class="stat-n g" id="sc-right">0</div><div class="stat-l">正确</div></div><div><div class="stat-n r" id="sc-wrong">0</div><div class="stat-l">错误</div></div><div><div class="stat-n" style="color:var(--accent)" id="sc-total">${S.total}</div><div class="stat-l">共计</div></div></div><div id="sc-detail" style="font-size:13px;color:var(--text2);line-height:1.8;margin:10px 0"></div><div class="weak-box" id="weakBox" style="display:none"><div class="weak-title">📌 需要重点加强</div><div class="weak-text" id="weakText"></div></div></div>`}
+function buildCard(q,i){const isLast=i===S.total-1;return`<div class="qtop"><div class="qlabel">📝 第 ${q.num} 题</div><div class="qtext">${q.text}</div></div><div class="passage" id="psg${i}"><div class="passage-head" onclick="togglePsg(${i})">📄 阅读原文 <span id="psg-tog${i}">收起 ▾</span></div><div class="passage-body" id="psg-body${i}">${EXAM.passage}</div></div><div><div class="steps-hd">🔍 解题思路拆解</div>${buildStep(i,0,'找出题目关键词',q.step1)}${buildStep(i,1,'在原文中定位',q.step2)}${buildStep(i,2,'含义判断',q.step3)}</div><div class="answer-sec" id="ans${i}"><div class="answer-prompt">根据以上分析，你的判断是：</div><div class="answer-opts"><button class="abtn" onclick="answer(${i},'TRUE')">TRUE</button><button class="abtn" onclick="answer(${i},'FALSE')">FALSE</button><button class="abtn" onclick="answer(${i},'NOT GIVEN')">NOT GIVEN</button></div><div class="ares" id="ares${i}"></div></div><div class="reveal-wrap" id="rev${i}"><div><div class="steps-hd">💡 答案揭晓</div><div style="padding:16px 20px"><div class="sinner">${q.step4}</div></div></div></div><div class="next-sec" id="nxt${i}"><button class="next-btn" onclick="${isLast?'showScore()':'go('+(i+1)+')'}">${isLast?'查看训练报告 →':'下一题 →'}</button></div>`}
+function buildStep(qi,si,title,content){const cls=si===0?'step unlocked':'step';const lock=si===0?'':'locked';return`<div class="${cls}" id="st${qi}-${si}" onclick="reveal(${qi},${si})"><div class="step-hd ${lock}"><div class="snum">${si+1}</div><div class="stitle">${title}</div><div class="sarrow">▸</div></div><div class="scontent"><div class="sinner">${content}</div></div></div>`}
+function togglePsg(i){const body=document.getElementById('psg-body'+i);const tog=document.getElementById('psg-tog'+i);body.classList.toggle('collapsed');tog.textContent=body.classList.contains('collapsed')?'展开 ▸':'收起 ▾'}
+function reveal(qi,si){if(S.steps[qi]<si)return;const el=document.getElementById('st'+qi+'-'+si);if(el.classList.contains('revealed'))return;el.classList.add('revealed','unlocked');el.querySelector('.step-hd').classList.remove('locked');S.steps[qi]=si+1;if(si<2){const nxt=document.getElementById('st'+qi+'-'+(si+1));if(nxt){nxt.classList.add('unlocked');nxt.querySelector('.step-hd').classList.remove('locked')}}if(si===1){const q=EXAM.questions[qi];document.querySelectorAll('#qcard'+qi+' .sent').forEach(s=>{if(q.hl.includes(s.id))s.classList.add('hl');else if(q.hl.length>0)s.classList.add('dim')})}if(si===2){const ans=document.getElementById('ans'+qi);ans.classList.add('show','fade-in');setTimeout(()=>ans.scrollIntoView({behavior:'smooth',block:'center'}),200)}}
+function answer(qi,val){if(S.answers[qi])return;S.answers[qi]=val;const q=EXAM.questions[qi];const ok=val===q.answer;document.querySelectorAll('#ans'+qi+' .abtn').forEach(b=>{b.disabled=true;if(b.textContent===val)b.classList.add(ok?'correct':'wrong');if(!ok&&b.textContent===q.answer)b.classList.add('correct')});const res=document.getElementById('ares'+qi);res.classList.add('show',ok?'ok':'no');res.textContent=ok?'✅ 正确！看看完整解析：':'❌ 你选了 '+val+'，正确答案是 '+q.answer+'。看看为什么：';setTimeout(()=>{const rev=document.getElementById('rev'+qi);rev.classList.add('show','fade-in');document.getElementById('nxt'+qi).classList.add('show');rev.scrollIntoView({behavior:'smooth',block:'center'})},400)}
+function jumpTo(qi){if(qi===S.cur&&!document.getElementById('scoreCard').classList.contains('show'))return;document.getElementById('scoreCard').classList.remove('show');const curCard=document.getElementById('qcard'+S.cur);if(curCard){curCard.querySelectorAll('.sent').forEach(s=>s.className='sent');curCard.classList.remove('active')}const pd=document.getElementById('dot'+S.cur);pd.classList.remove('active');if(S.answers[S.cur]!==undefined)pd.classList.add(S.answers[S.cur]===EXAM.questions[S.cur].answer?'done-right':'done-wrong');const card=document.getElementById('qcard'+qi);card.classList.add('active','fade-in');const nd=document.getElementById('dot'+qi);nd.classList.remove('done-right','done-wrong');nd.classList.add('active');S.cur=qi;window.scrollTo({top:0,behavior:'smooth'})}
+function go(qi){jumpTo(qi)}
+function showScore(){document.getElementById('qcard'+S.cur).classList.remove('active');const pd=document.getElementById('dot'+S.cur);pd.classList.remove('active');if(S.answers[S.cur]!==undefined)pd.classList.add(S.answers[S.cur]===EXAM.questions[S.cur].answer?'done-right':'done-wrong');let right=0,wrong=0,wrongs=[];EXAM.questions.forEach((q,i)=>{if(S.answers[i]===q.answer)right++;else{wrong++;wrongs.push(q)}});document.getElementById('sc-right').textContent=right;document.getElementById('sc-wrong').textContent=wrong;const emoji=document.getElementById('scoreEmoji');const title=document.getElementById('scoreTitle');if(right>=9){emoji.textContent='🎉';title.textContent='太棒了！'}else if(right>=7){emoji.textContent='💪';title.textContent='表现不错！'}else if(right>=5){emoji.textContent='📖';title.textContent='继续加油！'}else{emoji.textContent='🔄';title.textContent='需要多练习'}document.getElementById('sc-detail').textContent=`${S.total}题中答对${right}题。`;if(wrongs.length>0){document.getElementById('weakBox').style.display='block';document.getElementById('weakText').textContent='错题：'+wrongs.map(q=>'第'+q.num+'题('+q.answer+')').join('、')+'。建议回顾这些题的解题思路，重点关注步骤3的含义判断。'}document.getElementById('scoreCard').classList.add('show','fade-in');window.scrollTo({top:0,behavior:'smooth'})}
+init();
+</script>
+</body>
+</html>
